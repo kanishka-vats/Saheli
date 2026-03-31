@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  /* ── Typography ── */
+  --font-sans: 'Poppins', sans-serif;
+
+  /* ── Radius ── */
+  --radius-card: 1rem;
+  --radius-btn: 0.75rem;
+  --radius-pill: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px rgba(210, 189, 171, 0.15);
+}
+
+:root {
+  --color-saheli-bg: #fff7f6;
+  --color-saheli-surface: #ffeceb;
+  --color-saheli-primary: #e88c86;
+  --color-saheli-accent: #d46f69;
+  --color-saheli-text: #3a2b2a;
+  --color-saheli-text-2: #5a4543;
+  --color-saheli-muted: #a88a86;
+  --color-saheli-border: #f2cfc9;
+  --color-saheli-secondary-1: #f3b1ab;
+  --color-saheli-secondary-2: #f7d6d2;
+}
+
+:root.dark {
+  --color-saheli-bg: #241815;
+  --color-saheli-surface: #443834;
+  --color-saheli-primary: #e88c86;
+  --color-saheli-accent: #d46f69;
+  --color-saheli-text: #f8c5bf;
+  --color-saheli-text-2: #f6e4e3;
+  --color-saheli-muted: #a88a86;
+  --color-saheli-border: #42302c;
+  --color-saheli-secondary-1: #3a2522;
+  --color-saheli-secondary-2: #4a3431;
+}
+
+/* ── Global Styles ── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-saheli-bg);
+  color: var(--color-saheli-text);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-saheli-secondary-2);
+  color: var(--color-saheli-text);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-saheli-border);
+  border-radius: 999px;
+}
+
+/* ── Animations ── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes waveform {
+  0% { height: 4px; }
+  50% { height: 24px; }
+  100% { height: 4px; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
