@@ -83,7 +83,7 @@
       {#each symptomOptions as symptom}
         <button
           onclick={() => toggleSymptom(symptom)}
-          class="px-5 py-3 border-4 border-(--color-saheli-border) font-black text-xs transition-all duration-100 {selectedSymptoms.includes(symptom) ? 'bg-(--color-saheli-accent) text-black shadow-brutal translate-x-[-2px] translate-y-[-2px]' : 'bg-(--color-saheli-surface) text-(--color-saheli-text)'}"
+          class="px-5 py-3 border-4 border-(--color-saheli-border) font-black text-xs transition-all duration-100 {selectedSymptoms.includes(symptom) ? 'bg-(--color-saheli-accent) text-white shadow-brutal translate-x-[-2px] translate-y-[-2px]' : 'bg-(--color-saheli-surface) text-(--color-saheli-text)'}"
           aria-pressed={selectedSymptoms.includes(symptom)}
         >
           {symptom}

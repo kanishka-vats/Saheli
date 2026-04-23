@@ -146,7 +146,7 @@
                   <div class="flex flex-wrap gap-1">
                     {#each log.symptoms as s}
                       <span
-                        class="text-[10px] font-black bg-black text-(--color-saheli-text) px-1.5 py-0.5"
+                        class="text-[10px] font-black bg-black text-white px-1.5 py-0.5"
                         >{s}</span
                       >
                     {/each}
