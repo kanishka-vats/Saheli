@@ -13,17 +13,17 @@
   let successMsg = $state("");
 
   const supabase = createSupabaseBrowserClient();
-  let isDark = $state(true); // Default to dark
+  let isDark = $state(false); // Default to light
 
   onMount(() => {
     const storedTheme = localStorage.theme;
-    if (storedTheme === "light") {
-      isDark = false;
-      document.documentElement.setAttribute("data-theme", "light");
-    } else {
+    if (storedTheme === "dark") {
       isDark = true;
       document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.theme = "dark";
+    } else {
+      isDark = false;
+      document.documentElement.setAttribute("data-theme", "light");
+      localStorage.theme = "light";
     }
   });
 

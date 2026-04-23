@@ -15,22 +15,22 @@
    COLOR TOKENS — LIGHT (default)
  ───────────────────────────────────────────── */
 :root {
-  --color-saheli-bg:      #0A0A0A;
-  --color-saheli-surface: #141414;
+  --color-saheli-bg:      #FFFFFF;
+  --color-saheli-surface: #FFFFFF;
 
   --color-saheli-primary: #FF7C15;
-  --color-saheli-accent:  #FFD600;
+  --color-saheli-accent:  #000000;
   --color-saheli-yellow:  #FFD600;
 
-  --color-saheli-text:    #F0EDE6;
-  --color-saheli-muted:   #888880;
-  --color-saheli-border:  #FF7C15;
+  --color-saheli-text:    #000000;
+  --color-saheli-muted:   #444444;
+  --color-saheli-border:  #000000;
 
-  --shadow-brutal:    3px 3px 0px 0px #FF7C15;
-  --shadow-brutal-lg: 8px 8px 0px 0px #FF7C15;
+  --shadow-brutal:    3px 3px 0px 0px #000000;
+  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
 }
 
-/* Manual override — add data-theme="dark" to <html> to force dark mode */
+/* Manual override — force dark mode */
 [data-theme="dark"] {
   --color-saheli-bg:      #0A0A0A;
   --color-saheli-surface: #141414;
@@ -47,7 +47,7 @@
   --shadow-brutal-lg: 8px 8px 0px 0px #FF7C15;
 }
 
-/* Manual override — force light mode regardless of OS */
+/* Manual override — force light mode */
 [data-theme="light"] {
   --color-saheli-bg:      #FFFFFF;
   --color-saheli-surface: #FFFFFF;

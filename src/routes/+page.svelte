@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
 
   let { data } = $props();
-  let isDark = $state(true); // Default to dark
+  let isDark = $state(false); // Default to light
 
   const heroText = "HEALTH COMPANION";
   let typed = $state("");
@@ -15,13 +15,13 @@
   onMount(() => {
     // Theme logic
     const storedTheme = localStorage.theme;
-    if (storedTheme === "light") {
-      isDark = false;
-      document.documentElement.setAttribute("data-theme", "light");
-    } else {
+    if (storedTheme === "dark") {
       isDark = true;
       document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.theme = "dark";
+    } else {
+      isDark = false;
+      document.documentElement.setAttribute("data-theme", "light");
+      localStorage.theme = "light";
     }
 
     // Typewriter effect (snappy brutalist style)
