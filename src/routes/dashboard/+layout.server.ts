@@ -44,7 +44,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		session,
 		user,
 		isGuest,
-		profile: profile ?? { display_name: user?.email?.split('@')[0] || 'Guest', username: user?.email?.split('@')[0] || 'guest', language_pref: 'en', avg_cycle_length: 28 },
+		profile: profile ? { ...profile, username: profile.display_name } : { display_name: user?.email?.split('@')[0] || 'Guest', username: user?.email?.split('@')[0] || 'guest', language_pref: 'en', avg_cycle_length: 28 },
 		periodLogs: periodLogs ?? [],
 		moodLogs: moodLogs ?? []
 	};

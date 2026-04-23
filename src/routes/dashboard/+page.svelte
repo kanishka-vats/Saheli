@@ -15,8 +15,8 @@
   // Simple state for typewriter greeting
   const profile = $derived(data.profile);
   const fullGreeting = $derived(
-    profile?.username
-      ? `HELLO, ${profile.username.split(" ")[0].toUpperCase()}.`
+    profile?.display_name
+      ? `HELLO, ${profile.display_name.toUpperCase()}.`
       : "HELLO, SAHELI.",
   );
   let greeting = $state("");
@@ -40,11 +40,17 @@
   const cycleStatus = "OVULATION PHASE";
 
   let showSettings = $state(false);
-  let newUsername = $state(
-    untrack(() => data.profile?.username || data.profile?.display_name || ""),
-  );
-  let avgCycleLength = $state(untrack(() => data.profile?.avg_cycle_length || 28));
-  let periodLength = $state(untrack(() => data.profile?.period_length || 5));
+  let newDisplayName = $state("");
+  let avgCycleLength = $state(28);
+  let periodLength = $state(5);
+
+  $effect(() => {
+    if (data.profile) {
+      newDisplayName = data.profile.display_name || "";
+      avgCycleLength = data.profile.avg_cycle_length || 28;
+      periodLength = data.profile.period_length || 5;
+    }
+  });
   let saving = $state(false);
   let saveStatus = $state<"success" | "error" | null>(null);
 
@@ -62,7 +68,7 @@
 
     try {
       const validated = profileSchema.parse({
-        username: newUsername.trim(),
+        display_name: newDisplayName.trim(),
         avgCycleLength: Number(avgCycleLength),
         periodLength: Number(periodLength)
       });
@@ -70,10 +76,8 @@
       const { error } = await supabase
         .from("profiles")
         .update({
-          username: validated.username,
-          display_name: validated.username,
-          avg_cycle_length: validated.avgCycleLength,
-          period_length: validated.periodLength
+          display_name: validated.display_name,
+          avg_cycle_length: validated.avgCycleLength
         })
         .eq("id", userId);
 
@@ -300,7 +304,7 @@
           <input
             id="username-input"
             type="text"
-            bind:value={newUsername}
+            bind:value={newDisplayName}
             class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
             placeholder="YOUR NAME"
           />
