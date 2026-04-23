@@ -83,11 +83,11 @@
 
       const { error } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: userId,
           display_name: validated.display_name,
           avg_cycle_length: validated.avgCycleLength
-        })
-        .eq("id", userId);
+        });
 
       if (!error) {
         saveStatus = "success";
