@@ -53,6 +53,7 @@
   });
   let saving = $state(false);
   let saveStatus = $state<"success" | "error" | null>(null);
+  let errorMessage = $state("");
 
   async function updateProfile() {
     if (saving) return;
@@ -95,18 +96,17 @@
         setTimeout(() => {
           showSettings = false;
           saveStatus = null;
+          errorMessage = "";
         }, 1500);
       } else {
         console.error("Profile save error:", error);
         saveStatus = "error";
+        errorMessage = error.message;
       }
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        console.error("Validation failed:", err.issues);
-      } else {
-        console.error("Unknown error:", err);
-      }
+    } catch (err: any) {
+      console.error("Unknown error:", err);
       saveStatus = "error";
+      errorMessage = err.message || "Unknown error";
     }
     saving = false;
   }
@@ -362,11 +362,14 @@
         {:else if saveStatus === "success"}
           SUCCESS! ✔
         {:else if saveStatus === "error"}
-          ERROR! [×]
+          {errorMessage || 'ERROR! [×]'}
         {:else}
           SAVE CHANGES
         {/if}
       </button>
+      {#if errorMessage}
+        <p class="text-[10px] text-red-600 font-bold uppercase text-center mt-2">{errorMessage}</p>
+      {/if}
     </div>
   </div>
 {/if}
