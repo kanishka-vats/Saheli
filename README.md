@@ -2,7 +2,7 @@
 
 A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI. Track your periods, log your moods, and talk to an AI companion that understands your cycle — in English, Hindi, or Hinglish.
 
-![Homepage](screenshots/homepage.png)
+![Homepage](screenshots/Homepage.png)
 
 ## Features
 
@@ -21,7 +21,7 @@ A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI
 
 | Calendar | Mood Tracker |
 |----------|-------------|
-| ![Calendar](screenshots/calender.png) | ![Mood Tracker](screenshots/mood.png) |
+| ![Calendar](screenshots/Calender.png) | ![Mood Tracker](screenshots/mood.png) |
 
 ## Tech Stack
 
