@@ -75,7 +75,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.from('profiles')
 		.select('language_pref')
 		.eq('id', user.id)
-		.single();
+		.maybeSingle();
 
 	return {
 		chatSessions: sessions,

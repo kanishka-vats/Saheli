@@ -1,313 +1,378 @@
 <script lang="ts">
-	import VoiceAssistant from "$lib/components/VoiceAssistant.svelte";
-	import CalendarIcon from "$lib/components/icons/CalendarIcon.svelte";
-	import MoodIcon from "$lib/components/icons/MoodIcon.svelte";
-	import SaheliLogoIcon from "$lib/components/icons/SaheliLogoIcon.svelte";
+  import { onMount, untrack } from "svelte";
+  import SaheliLogoIcon from "$lib/components/icons/SaheliLogoIcon.svelte";
+  import CalendarIcon from "$lib/components/icons/CalendarIcon.svelte";
+  import MoodIcon from "$lib/components/icons/MoodIcon.svelte";
+  import MicIcon from "$lib/components/icons/MicIcon.svelte";
+  import { createSupabaseBrowserClient } from "$lib/supabase/client";
+  import { invalidateAll } from "$app/navigation";
+  import { z } from "zod";
+  import DOMPurify from "isomorphic-dompurify";
+  import { profileSchema } from "$lib/schemas";
 
-	let { data } = $props();
+  let { data } = $props();
+  const supabase = createSupabaseBrowserClient();
 
-	// Compute current cycle day
-	const cycleDay = $derived(() => {
-		if (!data.periodLogs?.length) return null;
-		const lastPeriod = data.periodLogs[0];
-		const start = new Date(lastPeriod.start_date);
-		const today = new Date();
-		const diff = Math.floor(
-			(today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-		);
-		return diff + 1;
-	});
+  // Simple state for typewriter greeting
+  const profile = $derived(data.profile);
+  const fullGreeting = $derived(
+    profile?.username
+      ? `HELLO, ${profile.username.split(" ")[0].toUpperCase()}.`
+      : "HELLO, SAHELI.",
+  );
+  let greeting = $state("");
 
-	const nextPeriodIn = $derived(() => {
-		if (!data.periodLogs?.length || !data.profile?.avg_cycle_length)
-			return null;
-		const cd = cycleDay();
-		if (cd === null) return null;
-		return Math.max(0, data.profile.avg_cycle_length - cd);
-	});
+  $effect(() => {
+    // Reset and re-run typewriter whenever fullGreeting changes
+    greeting = "";
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < fullGreeting.length) {
+        greeting = fullGreeting.slice(0, ++i);
+      } else {
+        clearInterval(interval);
+      }
+    }, 50);
+    return () => clearInterval(interval);
+  });
 
-	const latestMood = $derived(() => {
-		if (!data.moodLogs?.length) return null;
-		return data.moodLogs[0];
-	});
+  // Calculate cycle day (mock logic for demo)
+  const cycleDay = 14;
+  const cycleStatus = "OVULATION PHASE";
 
-	const moodEmojis = ["", "😞", "😟", "😐", "😊", "😄"];
+  let showSettings = $state(false);
+  let newUsername = $state(
+    untrack(() => data.profile?.username || data.profile?.display_name || ""),
+  );
+  let avgCycleLength = $state(untrack(() => data.profile?.avg_cycle_length || 28));
+  let periodLength = $state(untrack(() => data.profile?.period_length || 5));
+  let saving = $state(false);
+  let saveStatus = $state<"success" | "error" | null>(null);
+
+  async function updateProfile() {
+    if (saving) return;
+    saving = true;
+    saveStatus = null;
+
+    const userId = data.session?.user?.id || data.user?.id;
+    if (!userId) {
+      saveStatus = "error";
+      saving = false;
+      return;
+    }
+
+    try {
+      // 1. Zod Validation & DOMPurify Sanitization
+      const safeData = profileSchema.parse({
+        username: DOMPurify.sanitize(newUsername),
+        avgCycleLength: Number(avgCycleLength),
+        periodLength: Number(periodLength)
+      });
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username: safeData.username,
+          display_name: safeData.username,
+          avg_cycle_length: safeData.avgCycleLength,
+          period_length: safeData.periodLength
+        })
+        .eq("id", userId);
+
+      if (!error) {
+        saveStatus = "success";
+        await invalidateAll();
+        setTimeout(() => {
+          showSettings = false;
+          saveStatus = null;
+        }, 1500);
+      } else {
+        console.error("Profile save error:", error);
+        saveStatus = "error";
+      }
+    } catch (err: unknown) {
+      if (err instanceof z.ZodError) {
+        console.error("Validation failed:", err.issues);
+      } else {
+        console.error("Unknown error:", err);
+      }
+      saveStatus = "error";
+    }
+    saving = false;
+  }
 </script>
 
-<svelte:head>
-	<title>Dashboard — Saheli</title>
-</svelte:head>
+<div class="flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
+  <!-- Header -->
+  <header
+    class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b-4 border-(--color-saheli-border) pb-4 shrink-0"
+  >
+    <div class="min-w-0 flex-1">
+      <div
+        class="inline-block px-2 py-0.5 bg-black text-white font-black text-[10px] uppercase tracking-widest mb-2"
+      >
+        STATUS: ACTIVE
+      </div>
+      <h1
+        class="text-2xl md:text-4xl lg:text-5xl font-black leading-none tracking-tighter truncate w-full"
+      >
+        {greeting}<span class="animate-pulse">_</span>
+      </h1>
+    </div>
+    <div class="flex gap-3">
+      <button
+        onclick={() => (showSettings = true)}
+        class="brutal-btn bg-[--color-saheli-yellow] text-xs md:text-sm"
+        aria-label="Open Settings"
+      >
+        SETTINGS
+      </button>
+    </div>
+  </header>
 
-<div class="max-w-4xl mx-auto">
-	<!-- Greeting -->
-	<div class="mb-6 animate-fade-in">
-		<h1
-			class="text-2xl md:text-3xl font-bold flex items-center gap-2"
-			style="color: var(--color-saheli-text);"
-		>
-			Hello, {data.profile?.display_name ?? "there"}
-			<SaheliLogoIcon class="w-6 h-6 text-saheli-primary" />
-		</h1>
-		<p class="mt-1 text-sm" style="color: var(--color-saheli-muted);">
-			Talk to Saheli or check your health overview
-		</p>
-	</div>
+  <!-- Quick Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 shrink-0 lg:shrink lg:flex-1 lg:min-h-0">
+    <!-- Period Card -->
+    <div
+      class="brutal-card p-4 bg-[--color-saheli-primary] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
+    >
+      <div>
+        <div class="flex items-center justify-between mb-2 lg:mb-4">
+          <CalendarIcon
+            class="w-6 h-6 lg:w-8 lg:h-8 text-[--color-saheli-text]"
+          />
+          <span
+            class="font-black text-[10px] md:text-xs uppercase text-[--color-saheli-text]"
+            >PERIOD</span
+          >
+        </div>
+        <h2
+          class="text-3xl lg:text-5xl font-black mb-2 tracking-tighter text-[--color-saheli-text]"
+        >
+          DAY {cycleDay}
+        </h2>
+        <p
+          class="text-sm lg:text-lg font-black border-t-2 border-black pt-2 uppercase text-[--color-saheli-text]"
+        >
+          {cycleStatus}
+        </p>
+      </div>
+      <a
+        href="/dashboard/calendar"
+        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        >LOG PERIOD</a
+      >
+    </div>
 
-	<!-- AI Assistant Hero Card — the primary feature -->
-	<div
-		class="mb-6 animate-fade-in rounded-2xl overflow-hidden"
-		style="background: var(--color-saheli-surface); box-shadow: var(--shadow-card); animation-delay: 0.05s;"
-	>
-		<div class="flex flex-col p-1" style="height: 450px;">
-			<VoiceAssistant
-				chatHistory={[]}
-				languagePref={data.profile?.language_pref ?? "en"}
-			/>
-		</div>
-	</div>
+    <!-- Mood Card -->
+    <div
+      class="brutal-card p-4 bg-[--color-saheli-yellow] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
+    >
+      <div>
+        <div class="flex items-center justify-between mb-2 lg:mb-4">
+          <MoodIcon
+            class="w-6 h-6 lg:w-8 lg:h-8 text-[--color-saheli-text]"
+          />
+          <span
+            class="font-black text-[10px] md:text-xs uppercase text-[--color-saheli-text]"
+            >MOOD</span
+          >
+        </div>
+        <h2
+          class="text-3xl lg:text-5xl font-black mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
+        >
+          STABLE
+        </h2>
+        <p
+          class="text-sm lg:text-base font-bold opacity-80 uppercase text-[--color-saheli-text]"
+        >
+          LOG FEELINGS NOW.
+        </p>
+      </div>
+      <a
+        href="/dashboard/mood"
+        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        >LOG MOOD</a
+      >
+    </div>
 
-	<!-- Health Overview — compact row -->
-	<div
-		class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 animate-fade-in"
-		style="animation-delay: 0.15s;"
-	>
-		<!-- Cycle Day Card -->
-		<a
-			href="/dashboard/calendar"
-			class="rounded-2xl p-5 transition-all hover:scale-[1.02]"
-			style="background: linear-gradient(135deg, var(--color-saheli-secondary-1), var(--color-saheli-bg)); box-shadow: var(--shadow-soft);"
-		>
-			<div class="flex items-center gap-3 mb-2">
-				<div
-					class="w-9 h-9 rounded-lg flex items-center justify-center text-saheli-primary"
-					style="background: var(--color-saheli-border);"
-				>
-					<CalendarIcon class="w-5 h-5" />
-				</div>
-				<span
-					class="text-xs font-medium"
-					style="color: var(--color-saheli-muted);">Cycle Day</span
-				>
-			</div>
-			<p
-				class="text-2xl font-bold"
-				style="color: var(--color-saheli-accent);"
-			>
-				{cycleDay() !== null ? `Day ${cycleDay()}` : "—"}
-			</p>
-			{#if nextPeriodIn() !== null}
-				<p
-					class="text-[10px] mt-0.5"
-					style="color: var(--color-saheli-muted);"
-				>
-					{nextPeriodIn() === 0
-						? "Period expected today"
-						: `~${nextPeriodIn()} days left`}
-				</p>
-			{:else}
-				<p
-					class="text-[10px] mt-0.5"
-					style="color: var(--color-saheli-muted);"
-				>
-					Tap to log
-				</p>
-			{/if}
-		</a>
+    <!-- AI Assistant Card -->
+    <div
+      class="brutal-card p-4 bg-white text-[--color-saheli-text] flex flex-col justify-between h-full sm:col-span-2 lg:col-span-1 border-b-8 border-r-8 border-black overflow-hidden"
+    >
+      <div>
+        <div class="flex items-center justify-between mb-2 lg:mb-4">
+          <MicIcon class="w-6 h-6 lg:w-8 lg:h-8 text-[--color-saheli-text]" />
+          <span
+            class="font-black text-[10px] md:text-xs uppercase text-[--color-saheli-text]"
+            >AI ASSISTANT</span
+          >
+        </div>
+        <h2
+          class="text-2xl lg:text-4xl font-black mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
+        >
+          AI READY.
+        </h2>
+        <p
+          class="text-[10px] font-bold uppercase opacity-60 text-[--color-saheli-text]"
+        >
+          ASK ANYTHING IN HINGLISH.
+        </p>
+      </div>
+      <a
+        href="/dashboard/assistant"
+        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        >START CHAT →</a
+      >
+    </div>
+  </div>
 
-		<!-- Mood Card -->
-		<a
-			href="/dashboard/mood"
-			class="rounded-2xl p-5 transition-all hover:scale-[1.02]"
-			style="background: linear-gradient(135deg, var(--color-saheli-secondary-2), var(--color-saheli-secondary-1)); box-shadow: var(--shadow-soft);"
-		>
-			<div class="flex items-center gap-3 mb-2">
-				<div
-					class="w-9 h-9 rounded-lg flex items-center justify-center text-saheli-primary"
-					style="background: var(--color-saheli-border);"
-				>
-					<MoodIcon class="w-5 h-5" />
-				</div>
-				<span
-					class="text-xs font-medium"
-					style="color: var(--color-saheli-muted);">Mood</span
-				>
-			</div>
-			{#if latestMood()}
-				<div class="flex items-center gap-2">
-					{#if latestMood()!.mood_score === 1}
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							style="color: var(--color-saheli-primary); opacity: 0.9;"
-						>
-							<circle cx="12" cy="12" r="10"></circle><path
-								d="M8 15h8"
-							></path><path d="M9 9l-1 2"></path><path
-								d="M15 9l1 2"
-							></path>
-						</svg>
-					{:else if latestMood()!.mood_score === 2}
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							style="color: var(--color-saheli-primary); opacity: 0.9;"
-						>
-							<circle cx="12" cy="12" r="10"></circle><path
-								d="M16 16s-1.5-2-4-2-4 2-4 2"
-							></path><line x1="9" y1="9" x2="9.01" y2="9"
-							></line><line x1="15" y1="9" x2="15.01" y2="9"
-							></line>
-						</svg>
-					{:else if latestMood()!.mood_score === 3}
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							style="color: var(--color-saheli-primary); opacity: 0.9;"
-						>
-							<circle cx="12" cy="12" r="10"></circle><line
-								x1="8"
-								y1="15"
-								x2="16"
-								y2="15"
-							></line><line x1="9" y1="9" x2="9.01" y2="9"
-							></line><line x1="15" y1="9" x2="15.01" y2="9"
-							></line>
-						</svg>
-					{:else if latestMood()!.mood_score === 4}
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							style="color: var(--color-saheli-primary); opacity: 0.9;"
-						>
-							<circle cx="12" cy="12" r="10"></circle><path
-								d="M8 14s1.5 2 4 2 4-2 4-2"
-							></path><line x1="9" y1="9" x2="9.01" y2="9"
-							></line><line x1="15" y1="9" x2="15.01" y2="9"
-							></line>
-						</svg>
-					{:else if latestMood()!.mood_score === 5}
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							style="color: var(--color-saheli-primary); opacity: 0.9;"
-						>
-							<circle cx="12" cy="12" r="10"></circle><path
-								d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"
-							></path><path
-								d="M8 14c0 3 8 3 8 0c0-1-8-1-8 0z"
-								fill="currentColor"
-								fill-opacity="0.2"
-							></path>
-						</svg>
-					{/if}
-					<p
-						class="text-2xl font-bold"
-						style="color: var(--color-saheli-accent);"
-					>
-						{latestMood()!.mood_score}/5
-					</p>
-				</div>
-				<p
-					class="text-[10px] mt-0.5"
-					style="color: var(--color-saheli-muted);"
-				>
-					Energy: {latestMood()!.energy}/5
-				</p>
-			{:else}
-				<p
-					class="text-base font-medium"
-					style="color: var(--color-saheli-accent);"
-				>
-					Not logged
-				</p>
-				<p
-					class="text-[10px] mt-0.5"
-					style="color: var(--color-saheli-muted);"
-				>
-					Tap to check in
-				</p>
-			{/if}
-		</a>
-
-		<!-- Symptoms Card -->
-		<div
-			class="rounded-2xl p-5"
-			style="background: linear-gradient(135deg, var(--color-saheli-secondary-1), var(--color-saheli-border)); box-shadow: var(--shadow-soft);"
-		>
-			<div class="flex items-center gap-3 mb-2">
-				<div
-					class="w-9 h-9 rounded-lg flex items-center justify-center text-saheli-primary"
-					style="background: var(--color-saheli-border);"
-				>
-					<SaheliLogoIcon class="w-5 h-5" />
-				</div>
-				<span
-					class="text-xs font-medium"
-					style="color: var(--color-saheli-muted);">Symptoms</span
-				>
-			</div>
-			{#if data.moodLogs?.length}
-				{@const allSymptoms = [
-					...new Set(
-						data.moodLogs.flatMap((l: any) => l.symptoms || []),
-					),
-				].slice(0, 3)}
-				{#if allSymptoms.length}
-					<div class="flex flex-wrap gap-1">
-						{#each allSymptoms as s}
-							<span
-								class="px-2 py-0.5 rounded-full text-[10px] font-medium"
-								style="background: var(--color-saheli-border); color: var(--color-saheli-text);"
-								>{s}</span
-							>
-						{/each}
-					</div>
-				{:else}
-					<p
-						class="text-base font-medium"
-						style="color: var(--color-saheli-primary);"
-					>
-						All clear
-					</p>
-				{/if}
-			{:else}
-				<p
-					class="text-base font-medium"
-					style="color: var(--color-saheli-primary);"
-				>
-					No data yet
-				</p>
-			{/if}
-		</div>
-	</div>
+  <!-- Recent Logs -->
+  <section class="flex flex-col flex-1 shrink-0 lg:shrink min-h-0 gap-4">
+    <h3
+      class="text-2xl font-black tracking-tight uppercase text-(--color-saheli-text) shrink-0"
+    >
+      HISTORY
+    </h3>
+    <div class="space-y-3 overflow-y-auto pr-2 pb-4">
+      {#each data.moodLogs.slice(0, 3) as log, i}
+        <div
+          class="brutal-card p-3 md:p-5 bg-(--color-saheli-surface) flex items-center justify-between border-2 border-(--color-saheli-border)"
+        >
+          <div class="flex items-center gap-3 md:gap-6">
+            <div
+              class="w-8 h-8 md:w-12 md:h-12 bg-(--color-saheli-yellow) border-2 border-black flex items-center justify-center font-black text-sm"
+            >
+              {log.mood_score}
+            </div>
+            <div>
+              <p
+                class="text-sm md:text-xl font-black uppercase text-(--color-saheli-text)"
+              >
+                MOOD LOG
+              </p>
+              <p class="text-[10px] md:text-xs font-bold opacity-50 uppercase">
+                {new Date(log.date).toLocaleDateString("en-IN", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          </div>
+          <a
+            href="/dashboard/mood"
+            class="font-black text-[10px] md:text-sm border-b-2 border-(--color-saheli-border) hover:bg-(--color-saheli-text) hover:text-(--color-saheli-bg) px-1 text-(--color-saheli-text)"
+            >VIEW</a
+          >
+        </div>
+      {:else}
+        <div
+          class="brutal-card p-8 bg-(--color-saheli-surface) text-center border-2 border-dashed border-(--color-saheli-border)"
+        >
+          <p class="font-black opacity-40 uppercase text-(--color-saheli-text)">
+            NO LOGS YET. START TRACKING!
+          </p>
+        </div>
+      {/each}
+    </div>
+  </section>
 </div>
+
+{#if showSettings}
+  <div
+    class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-100 backdrop-blur-sm"
+  >
+    <div
+      class="brutal-card p-8 bg-(--color-saheli-surface) max-w-md w-full space-y-6 animate-brutal-up border-4 border-(--color-saheli-border) relative"
+    >
+      <button
+        onclick={() => (showSettings = false)}
+        class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-red-500 flex items-center justify-center font-black text-2xl hover:translate-x-1 hover:translate-y-1 transition-transform"
+        aria-label="Close Settings"
+      >
+        ×
+      </button>
+      <h3 class="text-3xl font-black text-(--color-saheli-text)">SETTINGS</h3>
+      <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+        <div>
+          <label
+            class="block font-black mb-1 text-[10px] uppercase tracking-widest text-(--color-saheli-text)"
+            for="username-input">DISPLAY NAME</label
+          >
+          <input
+            id="username-input"
+            type="text"
+            bind:value={newUsername}
+            class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+            placeholder="YOUR NAME"
+          />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block font-black mb-1 text-[10px] uppercase tracking-widest text-(--color-saheli-text)"
+              for="cycle-input">AVG CYCLE</label
+            >
+            <input
+              id="cycle-input"
+              type="number"
+              bind:value={avgCycleLength}
+              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+              min="20"
+              max="45"
+            />
+          </div>
+          <div>
+            <label
+              class="block font-black mb-1 text-[10px] uppercase tracking-widest text-(--color-saheli-text)"
+              for="period-input">PERIOD DAYS</label
+            >
+            <input
+              id="period-input"
+              type="number"
+              bind:value={periodLength}
+              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+              min="1"
+              max="10"
+            />
+          </div>
+        </div>
+      </div>
+      <button
+        onclick={updateProfile}
+        disabled={saving}
+        class="brutal-btn w-full {saveStatus === 'success'
+          ? 'bg-green-500'
+          : saveStatus === 'error'
+            ? 'bg-red-500'
+            : 'bg-(--color-saheli-primary)'} py-4! text-lg! disabled:opacity-50"
+      >
+        {#if saving}
+          SAVING...
+        {:else if saveStatus === "success"}
+          SUCCESS! ✔
+        {:else if saveStatus === "error"}
+          ERROR! [×]
+        {:else}
+          SAVE CHANGES
+        {/if}
+      </button>
+    </div>
+  </div>
+{/if}
+
+<style>
+  @keyframes brutal-up {
+    from {
+      transform: translateY(50px) rotate(5deg);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) rotate(0);
+      opacity: 1;
+    }
+  }
+  .animate-brutal-up {
+    animation: brutal-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+</style>

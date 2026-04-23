@@ -42,7 +42,7 @@ A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/saheli.git
+git clone https://github.com/kanishka-vats/saheli.git
 cd saheli
 bun install
 ```

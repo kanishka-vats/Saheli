@@ -1,179 +1,175 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+  type PeriodLog = {
+    id: string;
+    start_date: string;
+    end_date: string | null;
+    flow_intensity: number;
+  };
 
-	type PeriodLog = {
-		id: string;
-		start_date: string;
-		end_date: string | null;
-		flow_intensity: number;
-	};
+  let {
+    periodLogs = [],
+    avgCycleLength = 28,
+    periodLength = 5,
+    onLogPeriod
+  }: {
+    periodLogs: PeriodLog[];
+    avgCycleLength: number;
+    periodLength: number;
+    onLogPeriod?: (date: string) => void;
+  } = $props();
 
-	let {
-		periodLogs = [],
-		avgCycleLength = 28,
-		onLogPeriod
-	}: {
-		periodLogs: PeriodLog[];
-		avgCycleLength: number;
-		onLogPeriod?: (date: string) => void;
-	} = $props();
+  let currentMonth = $state(new Date().getMonth());
+  let currentYear = $state(new Date().getFullYear());
+  let flipDirection = $state<'next' | 'prev' | null>(null);
 
-	let currentMonth = $state(new Date().getMonth());
-	let currentYear = $state(new Date().getFullYear());
+  const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+  const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-	const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-	const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const daysInMonth = $derived(new Date(currentYear, currentMonth + 1, 0).getDate());
+  const firstDayOfWeek = $derived(new Date(currentYear, currentMonth, 1).getDay());
 
-	const daysInMonth = $derived(new Date(currentYear, currentMonth + 1, 0).getDate());
-	const firstDayOfWeek = $derived(new Date(currentYear, currentMonth, 1).getDay());
+  const periodDays = $derived(() => {
+    const days = new Set<string>();
+    for (const log of periodLogs) {
+      const intensity = Number(log.flow_intensity);
+      if (isNaN(intensity) || intensity === 0) continue; // Skip no-period/invalid logs
+      const start = new Date(log.start_date);
+      const end = log.end_date ? new Date(log.end_date) : new Date(start.getTime() + (periodLength - 1) * 24 * 60 * 60 * 1000);
+      let cursor = new Date(start);
+      while (cursor <= end) {
+        days.add(cursor.toISOString().split('T')[0]);
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+    return days;
+  });
 
-	// Build set of period day strings "YYYY-MM-DD"
-	const periodDays = $derived(() => {
-		const days = new Set<string>();
-		for (const log of periodLogs) {
-			const start = new Date(log.start_date);
-			const end = log.end_date ? new Date(log.end_date) : new Date(start.getTime() + 5 * 24 * 60 * 60 * 1000); // default 5 days
-			let cursor = new Date(start);
-			while (cursor <= end) {
-				days.add(cursor.toISOString().split('T')[0]);
-				cursor.setDate(cursor.getDate() + 1);
-			}
-		}
-		return days;
-	});
+  const predictedDays = $derived(() => {
+    const days = new Set<string>();
+    if (!periodLogs.length) return days;
+    const sorted = [...periodLogs]
+      .filter(l => Number(l.flow_intensity) > 0)
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+    
+    if (!sorted.length) return days;
 
-	// Build set of predicted period day strings
-	const predictedDays = $derived(() => {
-		const days = new Set<string>();
-		if (!periodLogs.length) return days;
+    const lastStart = new Date(sorted[0].start_date);
+    for (let cycle = 1; cycle <= 3; cycle++) {
+      const predictedStart = new Date(lastStart);
+      predictedStart.setDate(predictedStart.getDate() + avgCycleLength * cycle);
+      for (let d = 0; d < periodLength; d++) {
+        const day = new Date(predictedStart);
+        day.setDate(day.getDate() + d);
+        const key = day.toISOString().split('T')[0];
+        if (!periodDays().has(key)) { days.add(key); }
+      }
+    }
+    return days;
+  });
 
-		// Find the most recent period start
-		const sorted = [...periodLogs].sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
-		const lastStart = new Date(sorted[0].start_date);
+  function prevMonth() {
+    flipDirection = 'prev';
+    if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+    else { currentMonth--; }
+    setTimeout(() => flipDirection = null, 200);
+  }
 
-		// Predict next 3 cycles
-		for (let cycle = 1; cycle <= 3; cycle++) {
-			const predictedStart = new Date(lastStart);
-			predictedStart.setDate(predictedStart.getDate() + avgCycleLength * cycle);
-			for (let d = 0; d < 5; d++) {
-				const day = new Date(predictedStart);
-				day.setDate(day.getDate() + d);
-				const key = day.toISOString().split('T')[0];
-				if (!periodDays().has(key)) {
-					days.add(key);
-				}
-			}
-		}
-		return days;
-	});
+  function nextMonth() {
+    flipDirection = 'next';
+    if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+    else { currentMonth++; }
+    setTimeout(() => flipDirection = null, 200);
+  }
 
-	function prevMonth() {
-		if (currentMonth === 0) {
-			currentMonth = 11;
-			currentYear--;
-		} else {
-			currentMonth--;
-		}
-	}
+  function formatDate(day: number): string {
+    return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
 
-	function nextMonth() {
-		if (currentMonth === 11) {
-			currentMonth = 0;
-			currentYear++;
-		} else {
-			currentMonth++;
-		}
-	}
-
-	function formatDate(day: number): string {
-		return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-	}
-
-	function getDayStatus(day: number): 'active' | 'predicted' | 'today' | 'none' {
-		const dateStr = formatDate(day);
-		const today = new Date().toISOString().split('T')[0];
-		if (periodDays().has(dateStr)) return 'active';
-		if (predictedDays().has(dateStr)) return 'predicted';
-		if (dateStr === today) return 'today';
-		return 'none';
-	}
-
-	const flowLabels = ['', 'Light', 'Light-Med', 'Medium', 'Med-Heavy', 'Heavy'];
+  function getDayStatus(day: number): 'active' | 'predicted' | 'today' | 'none' {
+    const dateStr = formatDate(day);
+    const today = new Date().toISOString().split('T')[0];
+    if (periodDays().has(dateStr)) return 'active';
+    if (predictedDays().has(dateStr)) return 'predicted';
+    if (dateStr === today) return 'today';
+    return 'none';
+  }
 </script>
 
-<div class="rounded-2xl p-6" style="background: var(--color-saheli-surface); box-shadow: var(--shadow-card);">
-	<!-- Header -->
-	<div class="flex items-center justify-between mb-6">
-		<button
-			onclick={prevMonth}
-			class="w-9 h-9 rounded-xl flex items-center justify-center text-lg cursor-pointer transition-all hover:scale-110"
-			style="background: var(--color-saheli-secondary-1); color: var(--color-saheli-primary);"
-		>
-			←
-		</button>
-		<h2 class="text-lg font-semibold" style="color: var(--color-saheli-text);">
-			{monthNames[currentMonth]} {currentYear}
-		</h2>
-		<button
-			onclick={nextMonth}
-			class="w-9 h-9 rounded-xl flex items-center justify-center text-lg cursor-pointer transition-all hover:scale-110"
-			style="background: var(--color-saheli-secondary-1); color: var(--color-saheli-primary);"
-		>
-			→
-		</button>
-	</div>
+<div class="brutal-card p-6 bg-(--color-saheli-surface) font-sans">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8 border-b-4 border-(--color-saheli-border) pb-6">
+    <button
+      onclick={prevMonth}
+      class="brutal-btn p-2! bg-(--color-saheli-yellow)"
+      aria-label="Previous Month"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2 class="text-2xl font-black tracking-tighter text-(--color-saheli-text)">
+      {monthNames[currentMonth]} {currentYear}
+    </h2>
+    <button
+      onclick={nextMonth}
+      class="brutal-btn p-2! bg-(--color-saheli-yellow)"
+      aria-label="Next Month"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
 
-	<!-- Day Names -->
-	<div class="grid grid-cols-7 gap-1 mb-2">
-		{#each dayNames as name}
-			<div class="text-center text-xs font-medium py-2" style="color: var(--color-saheli-muted);">{name}</div>
-		{/each}
-	</div>
+  <!-- Day Names -->
+  <div class="grid grid-cols-7 gap-2 mb-4">
+    {#each dayNames as name}
+      <div class="text-center text-xs font-black py-2 bg-(--color-saheli-text) text-(--color-saheli-bg)">{name}</div>
+    {/each}
+  </div>
 
-	<!-- Calendar Grid -->
-	<div class="grid grid-cols-7 gap-1">
-		<!-- Empty cells for offset -->
-		{#each Array(firstDayOfWeek) as _}
-			<div></div>
-		{/each}
+  <!-- Calendar Grid -->
+  <div
+    class="grid grid-cols-7 gap-2"
+    class:animate-flip-next={flipDirection === 'next'}
+    class:animate-flip-prev={flipDirection === 'prev'}
+  >
+    {#each Array(firstDayOfWeek) as _}
+      <div class="aspect-square bg-(--color-saheli-bg) border-2 border-(--color-saheli-border)/10"></div>
+    {/each}
 
-		{#each Array(daysInMonth) as _, i}
-			{@const day = i + 1}
-			{@const status = getDayStatus(day)}
-			<button
-				onclick={() => onLogPeriod?.(formatDate(day))}
-				class="aspect-square rounded-xl flex items-center justify-center text-sm font-medium cursor-pointer transition-all duration-200 hover:scale-105 relative"
-				style="
-					background: {status === 'active' ? 'linear-gradient(135deg, var(--color-saheli-primary), var(--color-saheli-accent))' :
-						status === 'predicted' ? 'var(--color-saheli-secondary-2)' :
-						status === 'today' ? 'var(--color-saheli-secondary-1)' : 'transparent'};
-					color: {status === 'active' ? 'white' :
-						status === 'predicted' ? 'var(--color-saheli-accent)' :
-						status === 'today' ? 'white' : 'var(--color-saheli-text)'};
-					box-shadow: {status === 'active' ? 'var(--shadow-glow)' : 'none'};
-				"
-			>
-				{day}
-				{#if status === 'predicted'}
-					<span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full" style="background: var(--color-saheli-primary);"></span>
-				{/if}
-			</button>
-		{/each}
-	</div>
+    {#each Array(daysInMonth) as _, i}
+      {@const day = i + 1}
+      {@const status = getDayStatus(day)}
+      <button
+        onclick={() => onLogPeriod?.(formatDate(day))}
+        class="aspect-square border-4 border-(--color-saheli-border) font-black text-xl flex items-center justify-center transition-all duration-100 {status === 'active' ? 'bg-(--color-saheli-accent) text-white shadow-brutal translate-x-0.5 translate-y-0.5' : 
+               status === 'predicted' ? 'bg-(--color-saheli-surface) border-dashed text-(--color-saheli-text)' : 
+               status === 'today' ? 'bg-(--color-saheli-yellow) text-black' : 'bg-(--color-saheli-surface) text-(--color-saheli-text) hover:bg-(--color-saheli-bg)'}"
+      >
+        {day}
+      </button>
+    {/each}
+  </div>
 
-	<!-- Legend -->
-	<div class="flex items-center gap-4 mt-6 pt-4 border-t" style="border-color: var(--color-saheli-border);">
-		<div class="flex items-center gap-2">
-			<span class="w-3 h-3 rounded-full" style="background: var(--color-saheli-primary);"></span>
-			<span class="text-xs" style="color: var(--color-saheli-muted);">Period</span>
-		</div>
-		<div class="flex items-center gap-2">
-			<span class="w-3 h-3 rounded-full" style="background: var(--color-saheli-secondary-2); border: 1px solid var(--color-saheli-border);"></span>
-			<span class="text-xs" style="color: var(--color-saheli-muted);">Predicted</span>
-		</div>
-		<div class="flex items-center gap-2">
-			<span class="w-3 h-3 rounded-full" style="background: var(--color-saheli-secondary-1); border: 1px solid var(--color-saheli-border);"></span>
-			<span class="text-xs" style="color: var(--color-saheli-muted);">Today</span>
-		</div>
-	</div>
+  <!-- Legend -->
+  <div class="grid grid-cols-3 gap-4 mt-8 pt-8 border-t-4 border-(--color-saheli-border)">
+    <div class="flex items-center gap-3">
+      <div class="w-6 h-6 border-4 border-(--color-saheli-border) bg-(--color-saheli-accent)"></div>
+      <span class="text-xs font-black uppercase text-(--color-saheli-text)">PERIOD</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-6 h-6 border-4 border-(--color-saheli-border) border-dashed bg-(--color-saheli-surface)"></div>
+      <span class="text-xs font-black uppercase text-(--color-saheli-text)">PREDICTED</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-6 h-6 border-4 border-(--color-saheli-border) bg-(--color-saheli-yellow)"></div>
+      <span class="text-xs font-black uppercase text-(--color-saheli-text)">TODAY</span>
+    </div>
+  </div>
 </div>
+
+<style>
+  @keyframes flip-in {
+    from { opacity: 0; transform: scale(0.98) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .animate-flip-next { animation: flip-in 0.2s steps(4) both; }
+  .animate-flip-prev { animation: flip-in 0.2s steps(4) both; }
+</style>

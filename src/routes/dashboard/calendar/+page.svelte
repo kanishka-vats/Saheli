@@ -1,133 +1,119 @@
 <script lang="ts">
-	import Calendar from '$lib/components/Calendar.svelte';
-	import CalendarIcon from '$lib/components/icons/CalendarIcon.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { createSupabaseBrowserClient } from '$lib/supabase/client';
+  import Calendar from '$lib/components/Calendar.svelte';
+  import CalendarIcon from '$lib/components/icons/CalendarIcon.svelte';
+  import { invalidateAll } from '$app/navigation';
+  import { createSupabaseBrowserClient } from '$lib/supabase/client';
 
-	let { data } = $props();
-	const supabase = createSupabaseBrowserClient();
+  let { data } = $props();
+  const supabase = createSupabaseBrowserClient();
 
-	let startDate = $state('');
-	let showModal = $state(false);
-	let flowIntensity = $state(3);
-	let saving = $state(false);
+  let startDate = $state('');
+  let showModal = $state(false);
+  let flowIntensity = $state(3);
+  let saving = $state(false);
 
-	function handleLogPeriod(date: string) {
-		startDate = date;
-		flowIntensity = 3;
-		showModal = true;
-	}
+  function handleLogPeriod(date: string) {
+    startDate = date;
+    flowIntensity = 3;
+    showModal = true;
+  }
 
-	function closeModal() {
-		showModal = false;
-	}
+  function closeModal() { showModal = false; }
 
-	async function savePeriodLog() {
-		if (!startDate || saving) return;
-		saving = true;
+  async function savePeriodLog() {
+    if (!startDate || saving) return;
+    saving = true;
+    const { data: existing } = await supabase
+      .from('period_logs').select('id')
+      .eq('user_id', data.user?.id).eq('start_date', startDate).maybeSingle();
 
-		// Check if there's already a log for this date — toggle it off
-		const { data: existing } = await supabase
-			.from('period_logs')
-			.select('id')
-			.eq('user_id', data.user?.id)
-			.eq('start_date', startDate)
-			.maybeSingle();
-
-		if (existing) {
-			await supabase.from('period_logs').delete().eq('id', existing.id);
-		} else {
-			await supabase.from('period_logs').insert({
-				user_id: data.user?.id,
-				start_date: startDate,
-				end_date: null,
-				flow_intensity: flowIntensity
-			});
-		}
-
-		saving = false;
-		closeModal();
-		await invalidateAll();
-	}
+    if (existing) {
+      await supabase.from('period_logs').delete().eq('id', existing.id);
+    } else {
+      await supabase.from('period_logs').insert({
+        user_id: data.user?.id, start_date: startDate,
+        end_date: null, flow_intensity: flowIntensity
+      });
+    }
+    saving = false; closeModal(); await invalidateAll();
+  }
 </script>
 
 <svelte:head>
-	<title>Period Calendar — Saheli</title>
+  <title>CALENDAR — SAHELI</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto">
-	<div class="mb-6 animate-fade-in">
-		<h1 class="text-2xl font-bold flex items-center gap-2" style="color: var(--color-saheli-text);">
-			Period Calendar <CalendarIcon class="w-6 h-6 text-saheli-primary" />
-		</h1>
-		<p class="text-sm mt-1" style="color: var(--color-saheli-muted);">Track your cycle and see predictions</p>
-	</div>
+<div class="max-w-3xl mx-auto flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
+  <header class="border-b-4 md:border-b-8 border-black pb-4 md:pb-8 shrink-0">
+    <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+      <div class="w-12 h-12 md:w-16 md:h-16 bg-black text-white flex items-center justify-center border-2 md:border-4 border-black shadow-brutal">
+        <CalendarIcon class="w-6 h-6 md:w-8 md:h-8" />
+      </div>
+      <h1 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase">CALENDAR</h1>
+    </div>
+    <p class="text-sm md:text-xl lg:text-2xl font-bold uppercase tracking-tight">TRACK YOUR CYCLE • SEE PREDICTIONS • LOG DATA</p>
+  </header>
 
-	<div class="animate-fade-in" style="animation-delay: 0.1s;">
-		<Calendar
-			periodLogs={data.periodLogs}
-			avgCycleLength={data.profile?.avg_cycle_length ?? 28}
-			onLogPeriod={handleLogPeriod}
-		/>
-	</div>
+  <div class="animate-brutal-up flex-1 min-h-0 overflow-y-auto pr-2 pb-4">
+    <Calendar
+      periodLogs={data.periodLogs}
+      avgCycleLength={data.profile?.avg_cycle_length ?? 28}
+      periodLength={data.profile?.period_length ?? 5}
+      onLogPeriod={handleLogPeriod}
+    />
+  </div>
 </div>
 
 <!-- Log Period Modal -->
 {#if showModal}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-4"
-		style="background: rgba(0,0,0,0.3);"
-		onclick={closeModal}
-	>
-		<div
-			class="w-full max-w-sm rounded-2xl p-6 animate-fade-in"
-			style="background: var(--color-saheli-surface); box-shadow: var(--shadow-card);"
-			onclick={(e) => e.stopPropagation()}
-		>
-			<h3 class="text-lg font-semibold mb-4" style="color: var(--color-saheli-text);">
-				Log Period — {startDate}
-			</h3>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in" onclick={closeModal}>
+    <div
+      class="w-full max-w-lg brutal-card bg-white p-10 animate-brutal-up"
+      onclick={(e) => e.stopPropagation()}
+    >
+      <h3 class="text-4xl font-black mb-8 border-b-4 border-black pb-4 uppercase">
+        LOGGING: {startDate}
+      </h3>
 
-			<div class="mb-4">
-				<label for="flow-intensity" class="block text-sm font-medium mb-2" style="color: var(--color-saheli-text);">
-					Flow Intensity: <span class="font-bold" style="color: var(--color-saheli-primary);">{flowIntensity}/5</span>
-				</label>
-				<input
-					id="flow-intensity"
-					type="range"
-					min="1"
-					max="5"
-					step="1"
-					bind:value={flowIntensity}
-					class="w-full"
-					style="accent-color: var(--color-saheli-primary);"
-				/>
-				<div class="flex justify-between text-[10px] mt-1" style="color: var(--color-saheli-muted);">
-					<span>Light</span>
-					<span>Heavy</span>
-				</div>
-			</div>
+      <div class="mb-10">
+        <label for="flow-intensity" class="block text-sm font-black uppercase mb-4">
+          FLOW INTENSITY: <span class="text-3xl text-(--color-saheli-primary)">{flowIntensity}/5</span>
+        </label>
+        <div class="relative h-12 flex items-center">
+          <input
+            id="flow-intensity" type="range" min="0" max="5" step="1"
+            bind:value={flowIntensity}
+            class="w-full h-4 bg-black appearance-none cursor-pointer border-4 border-black"
+          />
+        </div>
+        <div class="flex justify-between font-black text-xs mt-2 uppercase">
+          <span>NONE (0)</span><span>HEAVY (5)</span>
+        </div>
+      </div>
 
-			<div class="flex gap-3">
-				<button
-					type="button"
-					onclick={closeModal}
-					class="flex-1 py-2.5 rounded-xl text-sm font-medium cursor-pointer"
-					style="background: var(--color-rose-50); color: var(--color-saheli-text);"
-				>
-					Cancel
-				</button>
-				<button
-					onclick={savePeriodLog}
-					disabled={saving}
-					class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white cursor-pointer disabled:opacity-60"
-					style="background: linear-gradient(135deg, var(--color-saheli-primary), var(--color-saheli-accent));"
-				>
-					{saving ? 'Saving...' : 'Save'}
-				</button>
-			</div>
-		</div>
-	</div>
+      <div class="flex gap-4">
+        <button type="button" onclick={closeModal} class="brutal-btn flex-1 bg-white py-4!">CANCEL</button>
+        <button onclick={savePeriodLog} disabled={saving} class="brutal-btn flex-1 bg-black text-white py-4! disabled:opacity-50">
+          {saving ? 'SAVING...' : 'CONFIRM LOG'}
+        </button>
+      </div>
+    </div>
+  </div>
 {/if}
+
+<style>
+  @keyframes brutal-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .animate-brutal-up { animation: brutal-up 0.2s steps(3) both; }
+
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 24px;
+    height: 32px;
+    background: var(--color-saheli-primary);
+    border: 4px solid black;
+    cursor: pointer;
+  }
+</style>

@@ -2,6 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Groq from 'groq-sdk';
 import { GROQ_API_KEY } from '$env/static/private';
+import { chatSchema } from '$lib/schemas';
+import DOMPurify from 'isomorphic-dompurify';
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
@@ -21,8 +23,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const formData = await request.formData();
 		const audioFile = formData.get('audio') as File;
 
-		if (!audioFile) {
-			return json({ error: 'No audio file provided' }, { status: 400 });
+		if (!audioFile || !(audioFile instanceof File)) {
+			return json({ error: 'Invalid audio file' }, { status: 400 });
 		}
 
 		try {
@@ -34,15 +36,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			userText = transcription.text;
 		} catch (err: any) {
 			console.error('Transcription error:', err);
-			return json({ error: 'Transcription failed: ' + err.message }, { status: 500 });
+			return json({ error: 'Failed to process audio' }, { status: 500 });
 		}
 	} else {
 		// Text input
-		const body = await request.json();
-		userText = body.text || '';
+		try {
+			const body = await request.json();
+			const validated = chatSchema.parse(body);
+			userText = validated.text;
+		} catch (err) {
+			return json({ error: 'Invalid message input' }, { status: 400 });
+		}
 	}
 
-	if (!userText.trim()) {
+	userText = DOMPurify.sanitize(userText.trim());
+
+	if (!userText) {
 		return json({ error: 'No input provided' }, { status: 400 });
 	}
 
@@ -69,7 +78,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.from('profiles')
 			.select('display_name, language_pref, avg_cycle_length')
 			.eq('id', user.id)
-			.single()
+			.maybeSingle()
 	]);
 
 	const periodLogs = periodResult.data ?? [];
@@ -146,7 +155,7 @@ You're an AI bestie, not a doctor. When giving health advice, casually mention t
 			max_tokens: 1024
 		});
 
-		const assistantText = chatCompletion.choices[0]?.message?.content || 'I apologize, I could not generate a response. Please try again.';
+		const assistantText = chatCompletion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
 
 		// ── Save to chat_history ──
 		await Promise.all([
@@ -165,6 +174,6 @@ You're an AI bestie, not a doctor. When giving health advice, casually mention t
 		return json({ userText, assistantText });
 	} catch (err: any) {
 		console.error('LLM error:', err);
-		return json({ error: 'AI response failed: ' + err.message }, { status: 500 });
+		return json({ error: 'AI Assistant is currently unavailable' }, { status: 500 });
 	}
 };

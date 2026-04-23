@@ -1,10 +1,4 @@
--- ============================================================
--- Saheli – Menstrual Health Assistant
--- Database Schema & Row Level Security
--- ============================================================
-
 -- 1. PROFILES
--- Automatically created when a user signs up via trigger
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
@@ -16,35 +10,51 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+-- Make policy creation safe to re-run
+drop policy if exists "Users can view own profile" on public.profiles;
 create policy "Users can view own profile"
-  on public.profiles for select
-  using (auth.uid() = id);
+on public.profiles
+for select
+using (auth.uid() = id);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"
-  on public.profiles for update
-  using (auth.uid() = id);
+on public.profiles
+for update
+using (auth.uid() = id);
 
+drop policy if exists "Users can insert own profile" on public.profiles;
 create policy "Users can insert own profile"
-  on public.profiles for insert
-  with check (auth.uid() = id);
+on public.profiles
+for insert
+with check (auth.uid() = id);
+
+-- NOTE: Your trigger below references `username` but your table does NOT have `username`.
+-- Fix either by adding `username` column OR removing it from the INSERT.
+-- For now, I've removed `username` to match your current table definition.
 
 -- Auto-create profile on signup
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = ''
+security definer
+set search_path = ''
 as $$
 begin
   insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1)));
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1))
+  );
   return new;
 end;
 $$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
 
 -- 2. PERIOD LOGS
 create table if not exists public.period_logs (
@@ -56,25 +66,34 @@ create table if not exists public.period_logs (
   created_at timestamptz not null default now()
 );
 
-create index idx_period_logs_user_date on public.period_logs (user_id, start_date desc);
+create index if not exists idx_period_logs_user_date on public.period_logs (user_id, start_date desc);
 
 alter table public.period_logs enable row level security;
 
+drop policy if exists "Users can view own period logs" on public.period_logs;
 create policy "Users can view own period logs"
-  on public.period_logs for select
-  using (auth.uid() = user_id);
+on public.period_logs
+for select
+using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own period logs" on public.period_logs;
 create policy "Users can insert own period logs"
-  on public.period_logs for insert
-  with check (auth.uid() = user_id);
+on public.period_logs
+for insert
+with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own period logs" on public.period_logs;
 create policy "Users can update own period logs"
-  on public.period_logs for update
-  using (auth.uid() = user_id);
+on public.period_logs
+for update
+using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own period logs" on public.period_logs;
 create policy "Users can delete own period logs"
-  on public.period_logs for delete
-  using (auth.uid() = user_id);
+on public.period_logs
+for delete
+using (auth.uid() = user_id);
+
 
 -- 3. MOOD LOGS
 create table if not exists public.mood_logs (
@@ -88,25 +107,34 @@ create table if not exists public.mood_logs (
   created_at timestamptz not null default now()
 );
 
-create index idx_mood_logs_user_date on public.mood_logs (user_id, date desc);
+create index if not exists idx_mood_logs_user_date on public.mood_logs (user_id, date desc);
 
 alter table public.mood_logs enable row level security;
 
+drop policy if exists "Users can view own mood logs" on public.mood_logs;
 create policy "Users can view own mood logs"
-  on public.mood_logs for select
-  using (auth.uid() = user_id);
+on public.mood_logs
+for select
+using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own mood logs" on public.mood_logs;
 create policy "Users can insert own mood logs"
-  on public.mood_logs for insert
-  with check (auth.uid() = user_id);
+on public.mood_logs
+for insert
+with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own mood logs" on public.mood_logs;
 create policy "Users can update own mood logs"
-  on public.mood_logs for update
-  using (auth.uid() = user_id);
+on public.mood_logs
+for update
+using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own mood logs" on public.mood_logs;
 create policy "Users can delete own mood logs"
-  on public.mood_logs for delete
-  using (auth.uid() = user_id);
+on public.mood_logs
+for delete
+using (auth.uid() = user_id);
+
 
 -- 4. CHAT HISTORY
 create table if not exists public.chat_history (
@@ -117,18 +145,24 @@ create table if not exists public.chat_history (
   created_at timestamptz not null default now()
 );
 
-create index idx_chat_history_user_time on public.chat_history (user_id, created_at desc);
+create index if not exists idx_chat_history_user_time on public.chat_history (user_id, created_at desc);
 
 alter table public.chat_history enable row level security;
 
+drop policy if exists "Users can view own chat history" on public.chat_history;
 create policy "Users can view own chat history"
-  on public.chat_history for select
-  using (auth.uid() = user_id);
+on public.chat_history
+for select
+using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own chat history" on public.chat_history;
 create policy "Users can insert own chat history"
-  on public.chat_history for insert
-  with check (auth.uid() = user_id);
+on public.chat_history
+for insert
+with check (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own chat history" on public.chat_history;
 create policy "Users can delete own chat history"
-  on public.chat_history for delete
-  using (auth.uid() = user_id);
+on public.chat_history
+for delete
+using (auth.uid() = user_id);

@@ -1,30 +1,47 @@
 {
-	"name": "baddie-sakhi",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.0",
-		"@sveltejs/kit": "^2.50.2",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@tailwindcss/vite": "^4.1.18",
-		"svelte": "^5.54.0",
-		"svelte-check": "^4.4.2",
-		"tailwindcss": "^4.1.18",
-		"typescript": "^5.9.3",
-		"vite": "^7.3.1"
-	},
-	"dependencies": {
-		"@supabase/ssr": "^0.10.0",
-		"@supabase/supabase-js": "^2.101.0",
-		"groq-sdk": "^1.1.2"
-	}
+  "name": "baddie-sakhi",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+
+    "scan:deps": "npm audit --audit-level=high || echo ''",
+    "scan:snyk": "bunx snyk test || echo 'Snyk test finished'",
+    "scan:sast": "bunx njsscan . || echo 'SAST scan finished'",
+
+    "predeploy": "bun run scan:deps && bun run scan:sast"
+  },
+
+  "engines": {
+    "node": ">=22"
+  },
+
+  "devDependencies": {
+    "@sveltejs/adapter-vercel": "^6.3.3",
+    "@sveltejs/kit": "^2.50.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tailwindcss/vite": "^4.1.18",
+    "eslint-plugin-security": "^4.0.0",
+    "snyk": "^1.1304.0",
+    "svelte": "^5.54.0",
+    "svelte-check": "^4.4.2",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+
+  "dependencies": {
+    "@supabase/ssr": "^0.10.0",
+    "@supabase/supabase-js": "^2.101.0",
+    "groq-sdk": "^1.1.2",
+    "isomorphic-dompurify": "^3.10.0",
+    "zod": "^4.3.6"
+  }
 }
