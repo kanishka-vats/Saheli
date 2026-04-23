@@ -21,7 +21,7 @@ A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI
 
 | Calendar | Mood Tracker |
 |----------|-------------|
-| ![Calendar](screenshots/Calender.png) | ![Mood Tracker](screenshots/mood.png) |
+| ![Calendar](screenshots/calendar.png) | ![Mood Tracker](screenshots/mood.png) |
 
 ## Tech Stack
 
