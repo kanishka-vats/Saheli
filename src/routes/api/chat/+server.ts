@@ -8,112 +8,113 @@ import DOMPurify from 'isomorphic-dompurify';
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	const { session, user } = await locals.safeGetSession();
-	if (!session || !user) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
-	}
-
-	let userText = '';
-
-	// Determine if audio or text
-	const contentType = request.headers.get('content-type') || '';
-
-	if (contentType.includes('multipart/form-data')) {
-		// Audio transcription via Groq Whisper
-		const formData = await request.formData();
-		const audioFile = formData.get('audio') as File;
-
-		if (!audioFile || !(audioFile instanceof File)) {
-			return json({ error: 'Invalid audio file' }, { status: 400 });
+	try {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) {
+			return json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		try {
-			const transcription = await groq.audio.transcriptions.create({
-				file: audioFile,
-				model: 'whisper-large-v3-turbo',
-				response_format: 'json'
-			});
-			userText = transcription.text;
-		} catch (err: any) {
-			console.error('Transcription error:', err);
-			return json({ error: 'Failed to process audio' }, { status: 500 });
+		let userText = '';
+
+		// Determine if audio or text
+		const contentType = request.headers.get('content-type') || '';
+
+		if (contentType.includes('multipart/form-data')) {
+			// Audio transcription via Groq Whisper
+			const formData = await request.formData();
+			const audioFile = formData.get('audio') as File;
+
+			if (!audioFile || !(audioFile instanceof File)) {
+				return json({ error: 'Invalid audio file' }, { status: 400 });
+			}
+
+			try {
+				const transcription = await groq.audio.transcriptions.create({
+					file: audioFile,
+					model: 'whisper-large-v3-turbo',
+					response_format: 'json'
+				});
+				userText = transcription.text;
+			} catch (err: any) {
+				console.error('Transcription error:', err);
+				return json({ error: 'Failed to process audio' }, { status: 500 });
+			}
+		} else {
+			// Text input
+			try {
+				const body = await request.json();
+				const validated = chatSchema.parse(body);
+				userText = validated.text;
+			} catch (err) {
+				return json({ error: 'Invalid message input' }, { status: 400 });
+			}
 		}
-	} else {
-		// Text input
-		try {
-			const body = await request.json();
-			const validated = chatSchema.parse(body);
-			userText = validated.text;
-		} catch (err) {
-			return json({ error: 'Invalid message input' }, { status: 400 });
+
+		userText = DOMPurify.sanitize(userText.trim());
+
+		if (!userText) {
+			return json({ error: 'No input provided' }, { status: 400 });
 		}
-	}
 
-	userText = DOMPurify.sanitize(userText.trim());
+		// ── Fetch Context: Last 3 months of period & mood logs ──
+		const threeMonthsAgo = new Date();
+		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+		const dateStr = threeMonthsAgo.toISOString().split('T')[0];
 
-	if (!userText) {
-		return json({ error: 'No input provided' }, { status: 400 });
-	}
+		const [periodResult, moodResult, profileResult] = await Promise.all([
+			locals.supabase
+				.from('period_logs')
+				.select('start_date, end_date, flow_intensity')
+				.eq('user_id', user.id)
+				.gte('start_date', dateStr)
+				.order('start_date', { ascending: false }),
+			locals.supabase
+				.from('mood_logs')
+				.select('date, mood_score, energy, symptoms, notes')
+				.eq('user_id', user.id)
+				.gte('date', dateStr)
+				.order('date', { ascending: false })
+				.limit(30),
+			locals.supabase
+				.from('profiles')
+				.select('display_name, language_pref, avg_cycle_length')
+				.eq('id', user.id)
+				.maybeSingle()
+		]);
 
-	// ── Fetch Context: Last 3 months of period & mood logs ──
-	const threeMonthsAgo = new Date();
-	threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-	const dateStr = threeMonthsAgo.toISOString().split('T')[0];
+		const periodLogs = periodResult.data ?? [];
+		const moodLogs = moodResult.data ?? [];
+		const profile = profileResult.data;
 
-	const [periodResult, moodResult, profileResult] = await Promise.all([
-		locals.supabase
-			.from('period_logs')
-			.select('start_date, end_date, flow_intensity')
-			.eq('user_id', user.id)
-			.gte('start_date', dateStr)
-			.order('start_date', { ascending: false }),
-		locals.supabase
-			.from('mood_logs')
-			.select('date, mood_score, energy, symptoms, notes')
-			.eq('user_id', user.id)
-			.gte('date', dateStr)
-			.order('date', { ascending: false })
-			.limit(30),
-		locals.supabase
-			.from('profiles')
-			.select('display_name, language_pref, avg_cycle_length')
-			.eq('id', user.id)
-			.maybeSingle()
-	]);
+		// ── Compute cycle context ──
+		let cycleContext = 'No period data available yet.';
+		if (periodLogs.length > 0) {
+			const lastPeriod = periodLogs[0];
+			const daysSincePeriod = Math.floor(
+				(Date.now() - new Date(lastPeriod.start_date).getTime()) / (1000 * 60 * 60 * 24)
+			);
+			const cycleLength = profile?.avg_cycle_length || 28;
+			const cycleDay = daysSincePeriod + 1;
+			const daysUntilNext = Math.max(0, cycleLength - daysSincePeriod);
 
-	const periodLogs = periodResult.data ?? [];
-	const moodLogs = moodResult.data ?? [];
-	const profile = profileResult.data;
+			cycleContext = `She is on cycle day ${cycleDay} (avg cycle: ${cycleLength} days). Last period started on ${lastPeriod.start_date}${lastPeriod.end_date ? `, ended on ${lastPeriod.end_date}` : ''}, flow intensity: ${lastPeriod.flow_intensity}/5. Next period expected in ~${daysUntilNext} days.`;
 
-	// ── Compute cycle context ──
-	let cycleContext = 'No period data available yet.';
-	if (periodLogs.length > 0) {
-		const lastPeriod = periodLogs[0];
-		const daysSincePeriod = Math.floor(
-			(Date.now() - new Date(lastPeriod.start_date).getTime()) / (1000 * 60 * 60 * 24)
-		);
-		const cycleLength = profile?.avg_cycle_length || 28;
-		const cycleDay = daysSincePeriod + 1;
-		const daysUntilNext = Math.max(0, cycleLength - daysSincePeriod);
-
-		cycleContext = `She is on cycle day ${cycleDay} (avg cycle: ${cycleLength} days). Last period started on ${lastPeriod.start_date}${lastPeriod.end_date ? `, ended on ${lastPeriod.end_date}` : ''}, flow intensity: ${lastPeriod.flow_intensity}/5. Next period expected in ~${daysUntilNext} days.`;
-
-		if (periodLogs.length > 1) {
-			cycleContext += `\nPrevious periods: ${periodLogs.slice(1, 4).map((l) => l.start_date).join(', ')}.`;
+			if (periodLogs.length > 1) {
+				cycleContext += `\nPrevious periods: ${periodLogs.slice(1, 4).map((l) => l.start_date).join(', ')}.`;
+			}
 		}
-	}
 
-	let moodContext = 'No recent mood data.';
-	if (moodLogs.length > 0) {
-		const recent = moodLogs.slice(0, 5);
-		moodContext = `Recent moods: ${recent.map((m) => `${m.date}: mood ${m.mood_score}/5, energy ${m.energy}/5${m.symptoms?.length ? `, symptoms: ${m.symptoms.join(', ')}` : ''}`).join(' | ')}`;
-	}
+		let moodContext = 'No recent mood data.';
+		if (moodLogs.length > 0) {
+			const recent = moodLogs.slice(0, 5);
+			moodContext = `Recent moods: ${recent.map((m) => `${m.date}: mood ${m.mood_score}/5, energy ${m.energy}/5${m.symptoms?.length ? `, symptoms: ${m.symptoms.join(', ')}` : ''}`).join(' | ')}`;
+		}
 
-	const langInstruction = profile?.language_pref === 'hi'
-		? 'IMPORTANT LANGUAGE RULES: Respond mostly in conversational Hindi. However, if the user explicitly asks you to speak in Hinglish or uses Romanized Hindi, you MUST write your entire response in Romanized Hindi (using the English alphabet, mixing Hindi and English words naturally, e.g., "Theek hai, ab se hum aise hi baat karenge!").'
-		: 'IMPORTANT LANGUAGE RULES: Respond in conversational English. However, if the user explicitly asks you to speak in Hinglish or uses Romanized Hindi along with their English, you MUST reply in natural Romanized Hindi mixed with English words (e.g., "Mujhe lagta hai aapko thoda aaram karna chahiye, health is important!").';
+		const langInstruction = profile?.language_pref === 'hi'
+			? 'IMPORTANT LANGUAGE RULES: Respond mostly in conversational Hindi. However, if the user explicitly asks you to speak in Hinglish or uses Romanized Hindi, you MUST write your entire response in Romanized Hindi (using the English alphabet, mixing Hindi and English words naturally, e.g., "Theek hai, ab se hum aise hi baat karenge!").'
+			: 'IMPORTANT LANGUAGE RULES: Respond in conversational English. However, if the user explicitly asks you to speak in Hinglish or uses Romanized Hindi along with their English, you MUST reply in natural Romanized Hindi mixed with English words (e.g., "Mujhe lagta hai aapko thoda aaram karna chahiye, health is important!").';
 
-	const systemPrompt = `You are Saheli (सहेली), a fun, relatable, and knowledgeable menstrual health buddy. You are NOT a mother figure — you are the user's same-age best friend / bestie who happens to know a lot about health.
+		const systemPrompt = `You are Saheli (सहेली), a fun, relatable, and knowledgeable menstrual health buddy. You are NOT a mother figure — you are the user's same-age best friend / bestie who happens to know a lot about health.
 
 ## Your Personality
 - Talk like a chill, caring friend — NOT like a parent or elder. 
@@ -143,8 +144,7 @@ You must adapt seamlessly to the user's language shifts. If they want Hinglish, 
 You're an AI bestie, not a doctor. When giving health advice, casually mention that seeing a real doc is always a good idea for serious stuff. Keep disclaimer brief and natural, not robotic.`;
 
 
-	// ── Call Groq LLM ──
-	try {
+		// ── Call Groq LLM ──
 		const chatCompletion = await groq.chat.completions.create({
 			model: 'llama-3.3-70b-versatile',
 			messages: [
@@ -173,7 +173,7 @@ You're an AI bestie, not a doctor. When giving health advice, casually mention t
 
 		return json({ userText, assistantText });
 	} catch (err: any) {
-		console.error('LLM error:', err);
-		return json({ error: 'AI Assistant is currently unavailable' }, { status: 500 });
+		console.error('Chat API Error:', err);
+		return json({ error: 'Saheli is busy right now. Please try again in a moment.' }, { status: 500 });
 	}
 };

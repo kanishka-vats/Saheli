@@ -127,7 +127,10 @@
       formData.append('audio', blob, 'recording.webm');
       const res = await fetch('/api/chat', { method: 'POST', body: formData });
       const data = await res.json();
-      if (!res.ok) { errorMessage = data.error || 'Something went wrong'; return; }
+      if (!res.ok) { 
+        errorMessage = data.error || data.message || 'Something went wrong'; 
+        return; 
+      }
       if (data.userText) { messages = [...messages, { role: 'user', content: data.userText }]; }
       if (data.assistantText) { messages = [...messages, { role: 'assistant', content: data.assistantText }]; speak(data.assistantText); }
       scrollToBottom();
@@ -152,7 +155,10 @@
         body: JSON.stringify({ text })
       });
       const data = await res.json();
-      if (!res.ok) { errorMessage = data.error || 'Something went wrong'; return; }
+      if (!res.ok) { 
+        errorMessage = data.error || data.message || 'Something went wrong'; 
+        return; 
+      }
       if (data.assistantText) { messages = [...messages, { role: 'assistant', content: data.assistantText }]; speak(data.assistantText); }
       scrollToBottom();
     } catch (err) {
