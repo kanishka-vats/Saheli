@@ -3,26 +3,20 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
-
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-
     "scan:deps": "npm audit --audit-level=high || echo ''",
     "scan:snyk": "bunx snyk test || echo 'Snyk test finished'",
     "scan:sast": "bunx njsscan . || echo 'SAST scan finished'",
-
     "predeploy": "bun run scan:deps && bun run scan:sast"
   },
-
   "engines": {
     "node": ">=22"
   },
-
   "devDependencies": {
     "@sveltejs/adapter-vercel": "^6.3.3",
     "@sveltejs/kit": "^2.50.2",
@@ -36,12 +30,10 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
-
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.0",
     "groq-sdk": "^1.1.2",
-    "isomorphic-dompurify": "^3.10.0",
     "zod": "^4.3.6"
   }
 }

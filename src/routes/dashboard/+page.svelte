@@ -7,7 +7,6 @@
   import { createSupabaseBrowserClient } from "$lib/supabase/client";
   import { invalidateAll } from "$app/navigation";
   import { z } from "zod";
-  import DOMPurify from "isomorphic-dompurify";
   import { profileSchema } from "$lib/schemas";
 
   let { data } = $props();
@@ -62,9 +61,8 @@
     }
 
     try {
-      // 1. Zod Validation & DOMPurify Sanitization
-      const safeData = profileSchema.parse({
-        username: DOMPurify.sanitize(newUsername),
+      const validated = profileSchema.parse({
+        username: newUsername.trim(),
         avgCycleLength: Number(avgCycleLength),
         periodLength: Number(periodLength)
       });
@@ -72,10 +70,10 @@
       const { error } = await supabase
         .from("profiles")
         .update({
-          username: safeData.username,
-          display_name: safeData.username,
-          avg_cycle_length: safeData.avgCycleLength,
-          period_length: safeData.periodLength
+          username: validated.username,
+          display_name: validated.username,
+          avg_cycle_length: validated.avgCycleLength,
+          period_length: validated.periodLength
         })
         .eq("id", userId);
 

@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import Groq from 'groq-sdk';
 import { GROQ_API_KEY } from '$env/static/private';
 import { chatSchema } from '$lib/schemas';
-import DOMPurify from 'isomorphic-dompurify';
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
@@ -50,7 +49,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		userText = DOMPurify.sanitize(userText.trim());
+		userText = userText.trim();
 
 		if (!userText) {
 			return json({ error: 'No input provided' }, { status: 400 });
