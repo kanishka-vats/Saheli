@@ -103,6 +103,13 @@
                   {/each}
                 </div>
               {/if}
+              
+              {#if log.notes}
+                <div class="pt-2 border-t-2 border-black border-dashed">
+                  <p class="text-[10px] font-bold uppercase opacity-60 italic">Notes:</p>
+                  <p class="text-xs font-bold uppercase leading-tight">{log.notes}</p>
+                </div>
+              {/if}
             </div>
           </div>
         {/each}

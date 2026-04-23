@@ -60,8 +60,16 @@
     saveStatus = null;
 
     const userId = data.session?.user?.id || data.user?.id;
+    
     if (!userId) {
-      saveStatus = "error";
+      if (data.isGuest) {
+        document.cookie = `saheli_display_name=${newDisplayName.trim()}; path=/; max-age=31536000`;
+        saveStatus = "success";
+        await invalidateAll();
+        setTimeout(() => { showSettings = false; saveStatus = null; }, 1500);
+      } else {
+        saveStatus = "error";
+      }
       saving = false;
       return;
     }

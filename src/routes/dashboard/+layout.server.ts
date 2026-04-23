@@ -40,11 +40,18 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		.gte('date', thirtyDaysAgo.toISOString().split('T')[0])
 		.order('date', { ascending: false }) : { data: [] };
 
+	const guestName = cookies.get('saheli_display_name') || 'Guest';
+
 	return {
 		session,
 		user,
 		isGuest,
-		profile: profile ? { ...profile, username: profile.display_name } : { display_name: user?.email?.split('@')[0] || 'Guest', username: user?.email?.split('@')[0] || 'guest', language_pref: 'en', avg_cycle_length: 28 },
+		profile: profile ? { ...profile, username: profile.display_name } : { 
+			display_name: guestName, 
+			username: guestName, 
+			language_pref: 'en', 
+			avg_cycle_length: 28 
+		},
 		periodLogs: periodLogs ?? [],
 		moodLogs: moodLogs ?? []
 	};

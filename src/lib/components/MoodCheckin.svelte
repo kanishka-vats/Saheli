@@ -96,8 +96,9 @@
   <div class="mb-10">
     <label for="notes" class="block text-sm font-black uppercase mb-4 tracking-widest text-(--color-saheli-text)">NOTES</label>
     <textarea
-      id="notes" bind:value={notes} placeholder="ANYTHING ELSE?"
+      id="notes" bind:value={notes} placeholder="ANYTHING ELSE? (MAX 100 CHARS)"
       rows="2"
+      maxlength="100"
       class="input-brutal text-lg! uppercase"
     ></textarea>
   </div>
