@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const profileSchema = z.object({
-	display_name: z.string().min(2, 'Name too short').max(30, 'Name too long').trim(),
+	username: z.string().min(2, 'Username too short').max(30, 'Username too long').trim(),
 	avgCycleLength: z.number().min(20).max(45),
-	periodLength: z.number().min(1).max(10).optional()
+	periodLength: z.number().min(1).max(10)
 });
 
 export const chatSchema = z.object({
