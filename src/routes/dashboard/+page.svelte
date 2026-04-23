@@ -8,6 +8,7 @@
   import { invalidateAll } from "$app/navigation";
   import { z } from "zod";
   import { profileSchema } from "$lib/schemas";
+  import { enhance } from "$app/forms";
 
   let { data } = $props();
   const supabase = createSupabaseBrowserClient();
@@ -56,59 +57,7 @@
   let errorMessage = $state("");
 
   async function updateProfile() {
-    if (saving) return;
-    saving = true;
-    saveStatus = null;
-
-    const userId = data.session?.user?.id || data.user?.id;
-    
-    if (!userId) {
-      if (data.isGuest) {
-        document.cookie = `saheli_display_name=${newDisplayName.trim()}; path=/; max-age=31536000`;
-        saveStatus = "success";
-        await invalidateAll();
-        setTimeout(() => { showSettings = false; saveStatus = null; }, 1500);
-      } else {
-        saveStatus = "error";
-      }
-      saving = false;
-      return;
-    }
-
-    try {
-      const validated = profileSchema.parse({
-        display_name: newDisplayName.trim(),
-        avgCycleLength: Number(avgCycleLength),
-        periodLength: Number(periodLength)
-      });
-
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({
-          id: userId,
-          display_name: validated.display_name,
-          avg_cycle_length: validated.avgCycleLength
-        });
-
-      if (!error) {
-        saveStatus = "success";
-        await invalidateAll();
-        setTimeout(() => {
-          showSettings = false;
-          saveStatus = null;
-          errorMessage = "";
-        }, 1500);
-      } else {
-        console.error("Profile save error:", error);
-        saveStatus = "error";
-        errorMessage = error.message;
-      }
-    } catch (err: any) {
-      console.error("Unknown error:", err);
-      saveStatus = "error";
-      errorMessage = err.message || "Unknown error";
-    }
-    saving = false;
+    // This function is now handled by form enhancement
   }
 </script>
 
@@ -292,10 +241,42 @@
   <div
     class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-100 backdrop-blur-sm"
   >
-    <div
+    <form
+      method="POST"
+      action="?/updateProfile"
+      use:enhance={() => {
+        saving = true;
+        saveStatus = null;
+        errorMessage = "";
+        
+        // Handle guest mode client-side since they can't call server actions easily
+        if (!data.session && data.isGuest) {
+           document.cookie = `saheli_display_name=${newDisplayName.trim()}; path=/; max-age=31536000`;
+           setTimeout(() => {
+             saving = false;
+             saveStatus = "success";
+             invalidateAll();
+             setTimeout(() => { showSettings = false; saveStatus = null; }, 1500);
+           }, 500);
+           return;
+        }
+
+        return async ({ result }: { result: import('@sveltejs/kit').ActionResult }) => {
+          saving = false;
+          if (result.type === 'success') {
+            saveStatus = "success";
+            await invalidateAll();
+            setTimeout(() => { showSettings = false; saveStatus = null; }, 1500);
+          } else if (result.type === 'failure') {
+            saveStatus = "error";
+            errorMessage = result.data?.message || "Failed to update profile.";
+          }
+        };
+      }}
       class="brutal-card p-8 bg-(--color-saheli-surface) max-w-md w-full space-y-6 animate-brutal-up border-4 border-(--color-saheli-border) relative"
     >
       <button
+        type="button"
         onclick={() => (showSettings = false)}
         class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-red-500 flex items-center justify-center font-black text-2xl hover:translate-x-1 hover:translate-y-1 transition-transform"
         aria-label="Close Settings"
@@ -311,10 +292,12 @@
           >
           <input
             id="username-input"
+            name="display_name"
             type="text"
             bind:value={newDisplayName}
             class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
             placeholder="YOUR NAME"
+            required
           />
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -325,6 +308,7 @@
             >
             <input
               id="cycle-input"
+              name="avgCycleLength"
               type="number"
               bind:value={avgCycleLength}
               class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
@@ -339,6 +323,7 @@
             >
             <input
               id="period-input"
+              name="periodLength"
               type="number"
               bind:value={periodLength}
               class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
@@ -349,7 +334,7 @@
         </div>
       </div>
       <button
-        onclick={updateProfile}
+        type="submit"
         disabled={saving}
         class="brutal-btn w-full {saveStatus === 'success'
           ? 'bg-green-500'
@@ -370,7 +355,7 @@
       {#if errorMessage}
         <p class="text-[10px] text-red-600 font-bold uppercase text-center mt-2">{errorMessage}</p>
       {/if}
-    </div>
+    </form>
   </div>
 {/if}
 

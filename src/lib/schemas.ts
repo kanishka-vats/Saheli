@@ -14,5 +14,5 @@ export const moodSchema = z.object({
 	mood_score: z.number().min(1).max(5),
 	energy: z.number().min(1).max(5),
 	symptoms: z.array(z.string()),
-	notes: z.string().max(1000).optional()
+	notes: z.string().max(100, 'Notes too long (max 100 characters)').optional()
 });
