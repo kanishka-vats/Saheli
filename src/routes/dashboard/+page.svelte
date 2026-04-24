@@ -143,7 +143,7 @@
   };
 </script>
 
-<div class="flex flex-col gap-5 lg:h-[calc(100dvh-4rem)]">
+<div class="flex flex-col gap-6 lg:gap-8 pb-10">
   <!-- Header -->
   <header
     class="flex items-center gap-2 border-b-2 border-(--color-saheli-border) pb-1.5 shrink-0 w-full"
@@ -171,7 +171,7 @@
     class="brutal-card no-card-shift border-2 border-(--color-saheli-border) overflow-hidden shrink-0 shadow-[0_20px_42px_rgba(186,120,146,0.32)]"
     style="background: color-mix(in oklab, var(--color-saheli-secondary, var(--color-saheli-yellow)) 52%, var(--color-saheli-surface) 48%);"
   >
-    <div class="h-[320px] md:h-[380px] lg:h-[400px] p-3 md:p-4">
+    <div class="h-[360px] md:h-[420px] lg:h-[500px] p-3 md:p-4">
       <VoiceAssistant
         chatHistory={[]}
         languagePref={data.profile?.language_pref || "en"}
@@ -182,7 +182,7 @@
 
   <!-- Quick Stats Grid -->
   <div
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 shrink-0 lg:shrink lg:flex-1 lg:min-h-0"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 shrink-0"
   >
     <!-- Period Card -->
     <div
@@ -199,10 +199,11 @@
           >
         </div>
         <h2
-          class="text-2xl lg:text-4xl font-black mb-1 lg:mb-2 tracking-tighter text-[--color-saheli-text]"
+          class="text-3xl lg:text-5xl font-black mb-1 lg:mb-2 tracking-tighter text-[--color-saheli-text]"
         >
           DAY {cycleDay}
         </h2>
+        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">day- {cycleDay}</p>
         <p
           class="text-sm lg:text-lg font-black border-t-2 border-(--color-saheli-border) pt-2 uppercase text-[--color-saheli-text]"
         >
@@ -211,7 +212,7 @@
       </div>
       <a
         href="/dashboard/calendar"
-        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-3 lg:mt-4 w-full py-1.5! text-center text-[10px] md:text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 lg:mt-6 w-full py-2.5! text-center text-xs"
         >LOG PERIOD</a
       >
     </div>
@@ -229,10 +230,11 @@
           >
         </div>
         <h2
-          class="text-2xl lg:text-4xl font-black mb-1 lg:mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
+          class="text-3xl lg:text-5xl font-black mb-1 lg:mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
         >
           STABLE
         </h2>
+        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">log your mood now</p>
         <p
           class="text-sm lg:text-base font-bold opacity-80 uppercase text-[--color-saheli-text]"
         >
@@ -241,7 +243,7 @@
       </div>
       <a
         href="/dashboard/mood"
-        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-3 lg:mt-4 w-full py-1.5! text-center text-[10px] md:text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 lg:mt-6 w-full py-2.5! text-center text-xs"
         >LOG MOOD</a
       >
     </div>
@@ -259,10 +261,11 @@
           >
         </div>
         <h2
-          class="text-xl lg:text-3xl font-black mb-1 lg:mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
+          class="text-2xl lg:text-4xl font-black mb-1 lg:mb-2 uppercase tracking-tighter text-[--color-saheli-text]"
         >
           AI READY.
         </h2>
+        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">ask anything for ai assistant</p>
         <p
           class="text-[10px] font-bold uppercase opacity-60 text-[--color-saheli-text]"
         >
@@ -271,20 +274,20 @@
       </div>
       <a
         href="/dashboard/assistant"
-        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-3 lg:mt-4 w-full py-1.5! text-center text-[10px] md:text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 lg:mt-6 w-full py-2.5! text-center text-xs"
         >START CHAT →</a
       >
     </div>
   </div>
 
   <!-- Recent Logs -->
-  <section class="flex flex-col flex-1 shrink-0 lg:shrink min-h-0 gap-4">
+  <section class="flex flex-col gap-4">
     <h3
       class="text-xl font-black tracking-tight uppercase text-(--color-saheli-text) shrink-0"
     >
       HISTORY
     </h3>
-    <div class="space-y-3 overflow-y-auto pr-2 pb-4">
+    <div class="space-y-3 pr-2 pb-4">
       {#each data.moodLogs.slice(0, 3) as log, i}
         <div
           class="brutal-card no-card-shift p-3 md:p-5 bg-(--color-saheli-surface) flex items-center justify-between border-2 border-(--color-saheli-border)"
