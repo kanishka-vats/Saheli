@@ -1,10 +1,10 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '$env/dynamic/private';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { env as publicEnv } from '$env/dynamic/public';
+import type { Actions } from './$types';
 
-/** @type {import('./$types').Actions} */
-export const actions = {
+export const actions: Actions = {
 	deleteAccount: async ({ locals, cookies }) => {
 		const { session, user } = await locals.safeGetSession();
 		const isGuest = cookies.get('saheli_guest') === 'true';
@@ -24,12 +24,15 @@ export const actions = {
 		// Use the service role key to bypass RLS and delete the user from auth.users
 		// The cascade constraints in the DB will clean up the profiles and logs
 		const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+		const supabaseUrl = publicEnv.PUBLIC_SUPABASE_URL;
 		
-		if (!serviceRoleKey) {
-			return fail(500, { message: 'SUPABASE_SERVICE_ROLE_KEY is not configured in the environment.' });
+		if (!serviceRoleKey || !supabaseUrl) {
+			return fail(500, {
+				message: 'Server configuration missing for account deletion.'
+			});
 		}
 
-		const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, serviceRoleKey, {
+		const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
