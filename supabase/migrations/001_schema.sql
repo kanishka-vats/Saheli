@@ -2,6 +2,7 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
+  username text unique not null, -- [UPDATED] Added username column with constraints
   language_pref text not null default 'en' check (language_pref in ('hi', 'en')),
   avg_cycle_length integer not null default 28 check (avg_cycle_length between 15 and 60),
   created_at timestamptz not null default now(),
@@ -29,10 +30,6 @@ on public.profiles
 for insert
 with check (auth.uid() = id);
 
--- NOTE: Your trigger below references `username` but your table does NOT have `username`.
--- Fix either by adding `username` column OR removing it from the INSERT.
--- For now, I've removed `username` to match your current table definition.
-
 -- Auto-create profile on signup
 create or replace function public.handle_new_user()
 returns trigger
@@ -41,10 +38,12 @@ security definer
 set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, display_name)
+  -- [UPDATED] Now inserts into both display_name and username
+  insert into public.profiles (id, display_name, username)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1))
+    coalesce(new.raw_user_meta_data ->> 'display_name', split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data ->> 'username', split_part(new.email, '@', 1))
   );
   return new;
 end;

@@ -54,8 +54,9 @@
   <!-- ── Marquee ── -->
   <div class="marquee">
     <div class="marquee-content">
-      TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST REAL TALK •
-      TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST REAL TALK •
+      TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST REAL
+      TALK • TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST
+      REAL TALK •
     </div>
   </div>
 

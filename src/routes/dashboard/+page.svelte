@@ -68,7 +68,10 @@
         document.cookie = `saheli_display_name=${newUsername.trim()}; path=/; max-age=31536000`;
         saveStatus = "success";
         await invalidateAll();
-        setTimeout(() => { showSettings = false; saveStatus = null; }, 1500);
+        setTimeout(() => {
+          showSettings = false;
+          saveStatus = null;
+        }, 1500);
       } else {
         saveStatus = "error";
         errorMessage = "User session not found.";
@@ -81,17 +84,15 @@
       const validated = profileSchema.parse({
         username: newUsername.trim(),
         avgCycleLength: Number(avgCycleLength),
-        periodLength: Number(periodLength)
+        periodLength: Number(periodLength),
       });
 
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({
-          id: userId,
-          username: validated.username,
-          display_name: validated.username,
-          avg_cycle_length: validated.avgCycleLength
-        });
+      const { error } = await supabase.from("profiles").upsert({
+        id: userId,
+        username: validated.username,
+        display_name: validated.username,
+        avg_cycle_length: validated.avgCycleLength,
+      });
 
       if (!error) {
         saveStatus = "success";
@@ -143,7 +144,9 @@
   </header>
 
   <!-- Quick Stats Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 shrink-0 lg:shrink lg:flex-1 lg:min-h-0">
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 shrink-0 lg:shrink lg:flex-1 lg:min-h-0"
+  >
     <!-- Period Card -->
     <div
       class="brutal-card p-4 bg-[--color-saheli-primary] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
@@ -182,9 +185,7 @@
     >
       <div>
         <div class="flex items-center justify-between mb-2 lg:mb-4">
-          <MoodIcon
-            class="w-6 h-6 lg:w-8 lg:h-8 text-[--color-saheli-text]"
-          />
+          <MoodIcon class="w-6 h-6 lg:w-8 lg:h-8 text-[--color-saheli-text]" />
           <span
             class="font-black text-[10px] md:text-xs uppercase text-[--color-saheli-text]"
             >MOOD</span
@@ -365,30 +366,18 @@
         {:else if saveStatus === "success"}
           SUCCESS! ✔
         {:else if saveStatus === "error"}
-          {errorMessage || 'ERROR! [×]'}
+          {errorMessage || "ERROR! [×]"}
         {:else}
           SAVE CHANGES
         {/if}
       </button>
       {#if errorMessage}
-        <p class="text-[10px] text-red-600 font-bold uppercase text-center mt-2">{errorMessage}</p>
+        <p
+          class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
+        >
+          {errorMessage}
+        </p>
       {/if}
     </div>
   </div>
 {/if}
-
-<style>
-  @keyframes brutal-up {
-    from {
-      transform: translateY(50px) rotate(5deg);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0) rotate(0);
-      opacity: 1;
-    }
-  }
-  .animate-brutal-up {
-    animation: brutal-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-  }
-</style>

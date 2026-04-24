@@ -44,8 +44,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		session,
 		user,
 		isGuest,
-		profile: profile ?? { display_name: user?.email?.split('@')[0] || 'Guest', username: user?.email?.split('@')[0] || 'guest', language_pref: 'en', avg_cycle_length: 28 },
-		periodLogs: periodLogs ?? [],
-		moodLogs: moodLogs ?? []
+		profile: profile, // Remove the hardcoded fallback here so you can see if the DB is empty
+		display_name_fallback: user?.email?.split('@')[0] || 'Guest'
 	};
 };
