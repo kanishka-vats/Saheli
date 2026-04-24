@@ -4,6 +4,7 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	const { session, user } = await locals.safeGetSession();
 	const isGuest = cookies.get('saheli_guest') === 'true';
+	const guestDisplayName = cookies.get('saheli_display_name')?.trim();
 
 	if (!session || !user) {
 		if (!isGuest) {
@@ -45,7 +46,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		user,
 		isGuest,
 		profile: profile,
-		display_name_fallback: user?.email?.split('@')[0] || 'Guest',
+		display_name_fallback: guestDisplayName || user?.email?.split('@')[0] || 'Guest',
 		periodLogs: periodLogs ?? [],
 		moodLogs: moodLogs ?? []
 	};

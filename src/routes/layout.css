@@ -132,6 +132,21 @@ h1, h2, h3, h4, h5, h6 {
   color: #F0EDE6 !important;
 }
 
+/* Stable card variant for pages where hover shift hurts UX */
+.no-card-shift,
+.no-card-shift:hover,
+.no-card-shift:focus-within,
+.no-card-shift:active {
+  transform: none !important;
+  box-shadow: var(--shadow-brutal) !important;
+}
+.no-card-shift:hover,
+.no-card-shift:focus-within,
+.no-card-shift:active {
+  background: var(--color-saheli-surface) !important;
+  color: var(--color-saheli-text) !important;
+}
+
 .brutal-btn {
   background: var(--color-saheli-primary);
   border: 2px solid #000000;

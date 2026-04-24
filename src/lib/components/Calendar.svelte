@@ -107,7 +107,7 @@
   }
 </script>
 
-<div class="brutal-card p-6 bg-(--color-saheli-surface) font-sans">
+<div class="brutal-card no-card-shift p-6 bg-(--color-saheli-surface) font-sans">
   <!-- Header -->
   <div class="flex items-center justify-between mb-8 border-b-4 border-(--color-saheli-border) pb-6">
     <button

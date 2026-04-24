@@ -39,7 +39,7 @@
   }
 </script>
 
-<div class="brutal-card p-8 bg-(--color-saheli-surface) font-sans">
+<div class="brutal-card no-card-shift p-8 bg-(--color-saheli-surface) font-sans">
   <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-(--color-saheli-text)">DAILY CHECK-IN</h2>
   <p class="text-lg font-bold mb-8 uppercase opacity-60 text-(--color-saheli-text)">HOW ARE YOU FEELING TODAY?</p>
 

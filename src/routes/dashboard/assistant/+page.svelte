@@ -83,7 +83,7 @@
 
   <aside class="
     {chatSidebarOpen ? 'flex fixed inset-y-0 left-0 z-50 animate-slide-left w-72' : 'hidden md:flex md:w-64 lg:w-72'} 
-    flex-col bg-white border-4 border-black brutal-card shrink-0"
+    flex-col bg-white border-4 border-black brutal-card no-card-shift shrink-0"
   >
     <!-- Header -->
     <div class="p-4 border-b-4 border-black bg-(--color-saheli-primary) flex items-center justify-between">
@@ -141,7 +141,7 @@
   </aside>
 
   <!-- ───── Main Chat Area ───── -->
-  <main class="flex-1 brutal-card border-4 border-black bg-white flex flex-col min-h-0 overflow-hidden relative">
+  <main class="flex-1 brutal-card no-card-shift border-4 border-black bg-white flex flex-col min-h-0 overflow-hidden relative">
     
     <!-- Top Bar -->
     <div class="p-4 border-b-4 border-black flex items-center justify-between shrink-0 bg-(--color-saheli-bg)">

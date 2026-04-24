@@ -13,12 +13,13 @@
   const supabase = createSupabaseBrowserClient();
 
   // Simple state for typewriter greeting
-  const profile = $derived(data.profile);
-  const fullGreeting = $derived(
-    profile?.username
-      ? `HELLO, ${profile.username.toUpperCase()}.`
-      : "HELLO, SAHELI.",
+  const greetingName = $derived(
+    data.profile?.username ||
+      data.profile?.display_name ||
+      data.display_name_fallback ||
+      "SAHELI",
   );
+  const fullGreeting = $derived(`HELLO, ${greetingName.toUpperCase()}.`);
   let greeting = $state("");
 
   $effect(() => {
@@ -149,7 +150,7 @@
   >
     <!-- Period Card -->
     <div
-      class="brutal-card p-4 bg-[--color-saheli-primary] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
+      class="brutal-card no-card-shift p-4 bg-[--color-saheli-primary] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
     >
       <div>
         <div class="flex items-center justify-between mb-2 lg:mb-4">
@@ -181,7 +182,7 @@
 
     <!-- Mood Card -->
     <div
-      class="brutal-card p-4 bg-[--color-saheli-yellow] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
+      class="brutal-card no-card-shift p-4 bg-[--color-saheli-yellow] text-[--color-saheli-text] flex flex-col justify-between h-full overflow-hidden"
     >
       <div>
         <div class="flex items-center justify-between mb-2 lg:mb-4">
@@ -211,7 +212,7 @@
 
     <!-- AI Assistant Card -->
     <div
-      class="brutal-card p-4 bg-white text-[--color-saheli-text] flex flex-col justify-between h-full sm:col-span-2 lg:col-span-1 border-b-8 border-r-8 border-black overflow-hidden"
+      class="brutal-card no-card-shift p-4 bg-white text-[--color-saheli-text] flex flex-col justify-between h-full sm:col-span-2 lg:col-span-1 border-b-8 border-r-8 border-black overflow-hidden"
     >
       <div>
         <div class="flex items-center justify-between mb-2 lg:mb-4">
@@ -250,7 +251,7 @@
     <div class="space-y-3 overflow-y-auto pr-2 pb-4">
       {#each data.moodLogs.slice(0, 3) as log, i}
         <div
-          class="brutal-card p-3 md:p-5 bg-(--color-saheli-surface) flex items-center justify-between border-2 border-(--color-saheli-border)"
+          class="brutal-card no-card-shift p-3 md:p-5 bg-(--color-saheli-surface) flex items-center justify-between border-2 border-(--color-saheli-border)"
         >
           <div class="flex items-center gap-3 md:gap-6">
             <div
@@ -280,7 +281,7 @@
         </div>
       {:else}
         <div
-          class="brutal-card p-8 bg-(--color-saheli-surface) text-center border-2 border-dashed border-(--color-saheli-border)"
+          class="brutal-card no-card-shift p-8 bg-(--color-saheli-surface) text-center border-2 border-dashed border-(--color-saheli-border)"
         >
           <p class="font-black opacity-40 uppercase text-(--color-saheli-text)">
             NO LOGS YET. START TRACKING!
@@ -296,12 +297,12 @@
     class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-100 backdrop-blur-sm"
   >
     <div
-      class="brutal-card p-8 bg-(--color-saheli-surface) max-w-md w-full space-y-6 animate-brutal-up border-4 border-(--color-saheli-border) relative"
+      class="brutal-card no-card-shift p-8 bg-(--color-saheli-surface) max-w-md w-full space-y-6 animate-brutal-up border-4 border-(--color-saheli-border) relative"
     >
       <button
         type="button"
         onclick={() => (showSettings = false)}
-        class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-red-500 flex items-center justify-center font-black text-2xl hover:translate-x-1 hover:translate-y-1 transition-transform"
+        class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-red-500 flex items-center justify-center font-black text-2xl"
         aria-label="Close Settings"
       >
         ×
@@ -371,6 +372,26 @@
           SAVE CHANGES
         {/if}
       </button>
+      <form
+        method="POST"
+        action="?/deleteAccount"
+        onsubmit={(e) => {
+          if (
+            !confirm(
+              "DELETE YOUR ACCOUNT PERMANENTLY? THIS CANNOT BE UNDONE.",
+            )
+          ) {
+            e.preventDefault();
+          }
+        }}
+      >
+        <button
+          type="submit"
+          class="brutal-btn w-full bg-red-600! text-white! py-3! text-sm"
+        >
+          DELETE ACCOUNT
+        </button>
+      </form>
       {#if errorMessage}
         <p
           class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
