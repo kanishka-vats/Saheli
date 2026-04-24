@@ -71,7 +71,7 @@
       <SaheliLogoIcon class="w-6 h-6 text-black" />
       <span class="font-black tracking-tighter uppercase">AI ASSISTANT</span>
     </div>
-    <button onclick={() => chatSidebarOpen = !chatSidebarOpen} class="brutal-btn p-2! bg-(--color-saheli-yellow)">
+    <button onclick={() => chatSidebarOpen = !chatSidebarOpen} class="brutal-btn p-2! bg-(--color-saheli-yellow)" aria-label="Toggle Sidebar">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
   </div>

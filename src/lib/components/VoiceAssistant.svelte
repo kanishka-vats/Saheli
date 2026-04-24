@@ -375,12 +375,13 @@
       </div>
     {/if}
 
+    {#if (isGuest && guestChatCount.value >= 3) || errorMessage}
       {#if isGuest && guestChatCount.value >= 3}
         <div class="p-4 border-4 border-black bg-(--color-saheli-yellow) space-y-3 shadow-brutal animate-bounce">
           <p class="font-black text-sm uppercase text-center">LIMIT REACHED! LOGIN TO CONTINUE YOUR CHAT WITH SAHELI.</p>
           <a href="/login" class="brutal-btn w-full bg-black text-white py-3! text-center block">LOGIN / SIGNUP</a>
         </div>
-      {:else}
+      {:else if errorMessage}
         <div
           class="p-2 border-2 border-black bg-red-100 text-red-900 font-black text-[9px] uppercase text-center"
         >
