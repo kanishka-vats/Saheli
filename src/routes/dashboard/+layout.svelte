@@ -57,19 +57,19 @@
 >
   <!-- ───── Sidebar (Desktop Left) ───── -->
   <aside
-    class="hidden lg:flex flex-col w-64 bg-(--color-saheli-surface) border-r-2 border-(--color-saheli-border) h-screen fixed left-0 top-0 p-5 space-y-6 z-40"
+    class="hidden lg:flex flex-col w-60 bg-(--color-saheli-surface) border-r-2 border-(--color-saheli-border) h-screen fixed left-0 top-0 p-4 space-y-4 z-40"
   >
     <!-- Logo -->
-    <a href="/" class="flex items-center gap-3 mb-4">
-      <SaheliLogoIcon class="w-10 h-10 text-(--color-saheli-text)" />
+    <a href="/" class="flex items-center gap-2 mb-2">
+      <SaheliLogoIcon class="w-8 h-8 text-(--color-saheli-text)" />
       <span
-        class="text-3xl font-black tracking-tighter text-(--color-saheli-text)"
+        class="text-2xl font-black tracking-tighter text-(--color-saheli-text)"
         >SAHELI</span
       >
     </a>
 
     <!-- Nav -->
-    <nav class="flex-1 space-y-3">
+    <nav class="flex-1 space-y-2">
       {#each navItems as item}
         <a
           href={item.href}
@@ -78,14 +78,14 @@
             ? 'bg-(--color-saheli-text)! text-(--color-saheli-bg)!'
             : 'bg-(--color-saheli-surface) text-(--color-saheli-text)'}"
         >
-          <item.icon class="w-6 h-6" />
-          <span class="font-black text-xs">{item.label}</span>
+          <item.icon class="w-5 h-5" />
+          <span class="font-black text-[10px]">{item.label}</span>
         </a>
       {/each}
     </nav>
 
     <!-- User Section -->
-    <div class="border-t-2 border-(--color-saheli-border) pt-5 space-y-4">
+    <div class="border-t-2 border-(--color-saheli-border) pt-4 space-y-3">
       <div class="px-2">
         <p class="text-lg font-black truncate text-(--color-saheli-text)">
           {data.profile?.username || "USER"}
@@ -121,7 +121,7 @@
 
   <!-- ───── Mobile Header ───── -->
   <div
-    class="lg:hidden flex items-center justify-between px-6 py-4 border-b-4 border-(--color-saheli-border) bg-(--color-saheli-surface) sticky top-0 z-50"
+    class="lg:hidden flex items-center justify-between px-5 py-3 border-b-4 border-(--color-saheli-border) bg-(--color-saheli-surface) sticky top-0 z-50"
   >
     <button
       onclick={() => (sidebarOpen = !sidebarOpen)}
@@ -244,7 +244,7 @@
 
   <!-- Main Content Area -->
   <main
-    class="flex-1 p-4 md:p-8 min-w-0 bg-(--color-saheli-bg) lg:ml-64"
+    class="flex-1 p-4 md:p-6 min-w-0 bg-(--color-saheli-bg) lg:ml-60"
   >
     <div class="max-w-5xl mx-auto">
       {@render children()}

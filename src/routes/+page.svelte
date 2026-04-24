@@ -62,14 +62,14 @@
 
   <!-- ── Nav ── -->
   <nav
-    class="flex items-center justify-between px-4 md:px-6 py-2 border-b-1.5 border-(--color-saheli-border) bg-(--color-saheli-surface) sticky top-0 z-40"
+    class="flex items-center justify-between px-4 md:px-6 py-1.5 border-b-1.5 border-(--color-saheli-border) bg-(--color-saheli-surface) sticky top-0 z-40"
   >
     <div class="flex items-center gap-2">
       <SaheliLogoIcon
         class="w-7 h-7 md:w-9 md:h-9 text-(--color-saheli-text)"
       />
       <span
-        class="text-xl md:text-2xl font-black tracking-tighter text-(--color-saheli-text)"
+        class="text-lg md:text-xl font-black tracking-tighter text-(--color-saheli-text)"
         >SAHELI</span
       >
     </div>
@@ -127,9 +127,9 @@
 
   <!-- ── Hero ── -->
   <main
-    class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 px-4 md:px-6 py-6 md:py-10 max-w-7xl mx-auto w-full"
+    class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 px-4 md:px-6 py-4 md:py-6 max-w-7xl mx-auto w-full"
   >
-    <div class="flex-1 text-center lg:text-left space-y-4 md:space-y-6">
+    <div class="flex-1 text-center lg:text-left space-y-2 md:space-y-4">
       <div
         class="inline-block px-2 py-0.5 bg-(--color-saheli-primary) text-(--color-saheli-bg) font-black text-[9px] md:text-xs uppercase tracking-widest"
       >
@@ -137,27 +137,26 @@
       </div>
 
       <h1
-        class="text-4xl md:text-6xl lg:text-8xl font-black leading-none tracking-tighter text-(--color-saheli-text)"
+        class="text-3xl md:text-5xl lg:text-6xl font-black leading-none tracking-tighter text-(--color-saheli-text)"
       >
         YOUR CYCLE.<br />
         <span class="text-(--color-saheli-primary)">{typed}</span><span
-          class="animate-pulse">_</span
-        >
+          class="animate-pulse">_</span>
       </h1>
 
       <p
-        class="text-base md:text-xl font-bold leading-tight max-w-lg mx-auto lg:mx-0 text-(--color-saheli-text)"
+        class="text-sm md:text-base font-bold leading-tight max-w-lg mx-auto lg:mx-0 text-(--color-saheli-text)"
       >
         Track periods, log moods, and talk to an AI assistant. Simple. Bold.
         Brutal.
       </p>
 
       <div
-        class="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 md:gap-5"
+        class="flex flex-col sm:flex-row justify-center lg:justify-start gap-2 md:gap-4"
       >
         <a
           href={data.session ? "/dashboard" : "/login"}
-          class="brutal-btn text-lg! md:text-xl! px-6! md:px-10! py-3! md:py-4! bg-(--color-saheli-primary)"
+          class="brutal-btn text-base! md:text-lg! px-6! md:px-8! py-2.5! md:py-3.5! bg-(--color-saheli-primary)"
         >
           {data.session ? "GO TO DASHBOARD 💥" : "LET'S GO 💥"}
         </a>
@@ -228,14 +227,14 @@
     border-top: 4px solid var(--color-saheli-border);
     border-bottom: 4px solid var(--color-saheli-border);
     background: var(--color-saheli-primary);
-    padding: 0.75rem 0;
+    padding: 0.4rem 0;
     z-index: 10;
   }
 
   .marquee-content {
     display: inline-block;
     animation: marquee 30s linear infinite;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-transform: uppercase;
     padding-left: 100%;
