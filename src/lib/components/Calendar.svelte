@@ -30,14 +30,26 @@
 
   const periodDays = $derived(() => {
     const days = new Set<string>();
+    const exclusions = new Set<string>();
+
+    // First collect exclusions (intensity 0)
+    for (const log of periodLogs) {
+      if (Number(log.flow_intensity) === 0) {
+        exclusions.add(new Date(log.start_date).toISOString().split('T')[0]);
+      }
+    }
+
     for (const log of periodLogs) {
       const intensity = Number(log.flow_intensity);
-      if (isNaN(intensity) || intensity === 0) continue; // Skip no-period/invalid logs
+      if (isNaN(intensity) || intensity === 0) continue; 
       const start = new Date(log.start_date);
       const end = log.end_date ? new Date(log.end_date) : new Date(start.getTime() + (periodLength - 1) * 24 * 60 * 60 * 1000);
       let cursor = new Date(start);
       while (cursor <= end) {
-        days.add(cursor.toISOString().split('T')[0]);
+        const key = cursor.toISOString().split('T')[0];
+        if (!exclusions.has(key)) {
+          days.add(key);
+        }
         cursor.setDate(cursor.getDate() + 1);
       }
     }

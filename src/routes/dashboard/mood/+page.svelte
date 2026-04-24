@@ -6,6 +6,9 @@
 
   let { data } = $props();
   const supabase = createSupabaseBrowserClient();
+  let guestMoodLogs = $state<any[]>([]);
+
+  const moodLogs = $derived(data.session ? data.moodLogs : [...guestMoodLogs, ...data.moodLogs]);
 
   async function handleSave(checkinData: {
     mood_score: number;
@@ -14,6 +17,19 @@
     notes: string;
   }) {
     const today = new Date().toISOString().split("T")[0];
+
+    if (!data.session) {
+      guestMoodLogs = [{
+        id: Math.random().toString(36).substr(2, 9),
+        mood_score: checkinData.mood_score,
+        energy: checkinData.energy,
+        symptoms: checkinData.symptoms,
+        notes: checkinData.notes || null,
+        date: today
+      }, ...guestMoodLogs];
+      return;
+    }
+
     const { error } = await supabase.from("mood_logs").insert({
       user_id: data.user?.id,
       mood_score: checkinData.mood_score,
@@ -31,6 +47,11 @@
 
   async function deleteEntry(id: string) {
     if (!confirm("DELETE THIS ENTRY?")) return;
+
+    if (!data.session) {
+      guestMoodLogs = guestMoodLogs.filter(log => log.id !== id);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("id", id);
@@ -88,21 +109,20 @@
   </header>
 
   <div class="flex-1 min-h-0 overflow-y-auto pr-2 pb-4 space-y-8">
-    <div class="animate-brutal-up shrink-0">
+    <div class="shrink-0">
       <MoodCheckin onSave={handleSave} />
     </div>
 
     <!-- Recent History -->
-    {#if data.moodLogs?.length}
+    {#if moodLogs?.length}
       <section
-        class="space-y-6 animate-brutal-up shrink-0"
-        style="animation-delay: 0.1s;"
+        class="space-y-6 shrink-0"
       >
         <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter">
           RECENT ENTRIES
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {#each data.moodLogs.slice(0, 8) as log}
+          {#each moodLogs.slice(0, 8) as log}
             <div class="brutal-card p-6 bg-white flex flex-col justify-between">
               <div class="flex justify-between items-start mb-4">
                 <div
@@ -175,17 +195,4 @@
 </div>
 
 <style>
-  @keyframes brutal-up {
-    from {
-      transform: translateY(30px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  .animate-brutal-up {
-    animation: brutal-up 0.2s steps(3) both;
-  }
 </style>

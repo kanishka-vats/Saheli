@@ -6,6 +6,9 @@
 
   let { data } = $props();
   const supabase = createSupabaseBrowserClient();
+  let guestPeriodLogs = $state<any[]>([]);
+
+  const periodLogs = $derived(data.session ? data.periodLogs : [...guestPeriodLogs, ...data.periodLogs]);
 
   let startDate = $state('');
   let showModal = $state(false);
@@ -14,7 +17,9 @@
 
   function handleLogPeriod(date: string) {
     startDate = date;
-    flowIntensity = 3;
+    // Check if there's already a log for this date to pre-fill
+    const existing = periodLogs.find(l => l.start_date === date);
+    flowIntensity = existing ? Number(existing.flow_intensity) : 3;
     showModal = true;
   }
 
@@ -23,12 +28,28 @@
   async function savePeriodLog() {
     if (!startDate || saving) return;
     saving = true;
+
+    if (!data.session) {
+      // Guest mode
+      guestPeriodLogs = guestPeriodLogs.filter(l => l.start_date !== startDate);
+      guestPeriodLogs = [...guestPeriodLogs, {
+        id: Math.random().toString(36).substr(2, 9),
+        start_date: startDate,
+        end_date: null,
+        flow_intensity: flowIntensity
+      }];
+      saving = false; closeModal();
+      return;
+    }
+
     const { data: existing } = await supabase
       .from('period_logs').select('id')
       .eq('user_id', data.user?.id).eq('start_date', startDate).maybeSingle();
 
     if (existing) {
-      await supabase.from('period_logs').delete().eq('id', existing.id);
+      // If intensity is 0, we could delete it, but the new logic uses 0 as exclusion.
+      // So let's just update it.
+      await supabase.from('period_logs').update({ flow_intensity: flowIntensity }).eq('id', existing.id);
     } else {
       await supabase.from('period_logs').insert({
         user_id: data.user?.id, start_date: startDate,
@@ -54,9 +75,9 @@
     <p class="text-sm md:text-xl lg:text-2xl font-bold uppercase tracking-tight">TRACK YOUR CYCLE • SEE PREDICTIONS • LOG DATA</p>
   </header>
 
-  <div class="animate-brutal-up flex-1 min-h-0 overflow-y-auto pr-2 pb-4">
+  <div class="flex-1 min-h-0 overflow-y-auto pr-2 pb-4">
     <Calendar
-      periodLogs={data.periodLogs}
+      periodLogs={periodLogs}
       avgCycleLength={data.profile?.avg_cycle_length ?? 28}
       periodLength={data.profile?.period_length ?? 5}
       onLogPeriod={handleLogPeriod}
@@ -66,12 +87,17 @@
 
 <!-- Log Period Modal -->
 {#if showModal}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in" onclick={closeModal}>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in"
+    onclick={closeModal}
+  >
     <div
-      class="w-full max-w-lg brutal-card bg-white p-10 animate-brutal-up"
+      class="w-full max-w-lg brutal-card bg-white p-10 cursor-auto text-left"
       onclick={(e) => e.stopPropagation()}
     >
-      <h3 class="text-4xl font-black mb-8 border-b-4 border-black pb-4 uppercase">
+      <h3 id="modal-title" class="text-4xl font-black mb-8 border-b-4 border-black pb-4 uppercase">
         LOGGING: {startDate}
       </h3>
 
@@ -93,7 +119,7 @@
 
       <div class="flex gap-4">
         <button type="button" onclick={closeModal} class="brutal-btn flex-1 bg-white py-4!">CANCEL</button>
-        <button onclick={savePeriodLog} disabled={saving} class="brutal-btn flex-1 bg-black text-white py-4! disabled:opacity-50">
+        <button type="button" onclick={savePeriodLog} disabled={saving} class="brutal-btn flex-1 bg-black text-white py-4! disabled:opacity-50">
           {saving ? 'SAVING...' : 'CONFIRM LOG'}
         </button>
       </div>
@@ -102,11 +128,7 @@
 {/if}
 
 <style>
-  @keyframes brutal-up {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .animate-brutal-up { animation: brutal-up 0.2s steps(3) both; }
+
 
   input[type=range]::-webkit-slider-thumb {
     appearance: none;
