@@ -2,7 +2,7 @@
 
 Saheli is a menstrual health companion app built with SvelteKit, Supabase, and Groq. It supports authenticated and guest usage, period and mood tracking, and a multilingual AI assistant (English/Hindi/Hinglish) with optional voice input.
 
-![Homepage](screenshots/Homepage.png)
+![Homepage](screenshots/homepage.png)
 
 ## Current Features
 
@@ -26,7 +26,7 @@ Saheli is a menstrual health companion app built with SvelteKit, Supabase, and G
 
 | Dashboard | AI Assistant |
 |-----------|--------------|
-| ![Dashboard](screenshots/dashboard.png) | ![AI Assistant](screenshots/ai_assistant.png) |
+| ![Dashboard](screenshots/dashboard.png) | ![AI Assistant](screenshots/ai-assistant.png) |
 
 | Calendar | Mood Tracker |
 |----------|--------------|
