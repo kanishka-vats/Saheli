@@ -203,7 +203,11 @@
         >
           DAY {cycleDay}
         </h2>
-        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">day- {cycleDay}</p>
+        <p
+          class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]"
+        >
+          day- {cycleDay}
+        </p>
         <p
           class="text-sm lg:text-lg font-black border-t-2 border-(--color-saheli-border) pt-2 uppercase text-[--color-saheli-text]"
         >
@@ -234,7 +238,6 @@
         >
           STABLE
         </h2>
-        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">log your mood now</p>
         <p
           class="text-sm lg:text-base font-bold opacity-80 uppercase text-[--color-saheli-text]"
         >
@@ -265,11 +268,10 @@
         >
           AI READY.
         </h2>
-        <p class="text-[10px] font-black opacity-60 mb-2 uppercase text-[--color-saheli-text]">ask anything for ai assistant</p>
         <p
           class="text-[10px] font-bold uppercase opacity-60 text-[--color-saheli-text]"
         >
-          ASK ANYTHING IN HINGLISH.
+          ASK ANYTHING YOU WANT.
         </p>
       </div>
       <a
@@ -417,9 +419,7 @@
         use:enhance={enhanceDeleteAccount}
         onsubmit={(e: SubmitEvent) => {
           if (
-            !confirm(
-              "DELETE YOUR ACCOUNT PERMANENTLY? THIS CANNOT BE UNDONE.",
-            )
+            !confirm("DELETE YOUR ACCOUNT PERMANENTLY? THIS CANNOT BE UNDONE.")
           ) {
             e.preventDefault();
           }
@@ -430,11 +430,15 @@
           disabled={deleteStatus === "deleting"}
           class="brutal-btn w-full bg-(--color-saheli-accent)! text-(--color-saheli-bg)! py-3! text-sm"
         >
-          {deleteStatus === "deleting" ? "DELETING ACCOUNT..." : "DELETE ACCOUNT"}
+          {deleteStatus === "deleting"
+            ? "DELETING ACCOUNT..."
+            : "DELETE ACCOUNT"}
         </button>
       </form>
       {#if deleteStatus === "success"}
-        <p class="text-[10px] text-(--color-saheli-primary) font-bold uppercase text-center mt-2">
+        <p
+          class="text-[10px] text-(--color-saheli-primary) font-bold uppercase text-center mt-2"
+        >
           ACCOUNT DELETED. REDIRECTING TO LOGIN...
         </p>
       {/if}

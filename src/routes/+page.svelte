@@ -54,9 +54,8 @@
   <!-- ── Marquee ── -->
   <div class="marquee">
     <div class="marquee-content">
-      TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST REAL
-      TALK • TRACK YOUR PERIOD • LOG YOUR MOOD • TALK TO SAHELI • NO CRAP • JUST
-      REAL TALK •
+      Track your cycle • log your mood • talk to Saheli • gentle, real support •
+      Track your cycle • log your mood • talk to Saheli • gentle, real support
     </div>
   </div>
 
@@ -147,8 +146,8 @@
       <p
         class="text-sm md:text-base font-bold leading-tight max-w-lg mx-auto lg:mx-0 text-(--color-saheli-text)"
       >
-        Track periods, log moods, and talk to an AI assistant. Simple. Bold.
-        Brutal.
+       Track your cycle, log your mood, and talk to Saheli. Simple, thoughtful, 
+       and made to support you.
       </p>
 
       <div
@@ -158,7 +157,7 @@
           href={data.session ? "/dashboard" : "/login"}
           class="brutal-btn text-base! md:text-lg! px-6! md:px-8! py-2.5! md:py-3.5! bg-(--color-saheli-primary)"
         >
-          {data.session ? "GO TO DASHBOARD 💥" : "LET'S GO 💥"}
+          {data.session ? "GO TO DASHBOARD " : "LET'S GO "}
         </a>
       </div>
     </div>
@@ -173,7 +172,7 @@
         <CalendarIcon class="w-8 h-8 mb-3" />
         <h3 class="text-lg font-black mb-1 text-(--color-saheli-text)">CALENDAR</h3>
         <p class="font-bold text-[10px] uppercase opacity-70">
-          NO FLUFF. JUST DATES.
+          Track your cycle.
         </p>
       </div>
 

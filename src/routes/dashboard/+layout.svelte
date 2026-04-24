@@ -88,12 +88,12 @@
     <div class="border-t-2 border-(--color-saheli-border) pt-4 space-y-3">
       <div class="px-2">
         <p class="text-lg font-black truncate text-(--color-saheli-text)">
-          {data.profile?.username || "USER"}
+          {data.profile?.username || data.display_name_fallback || "USER"}
         </p>
         <p
           class="text-[10px] font-bold opacity-50 truncate uppercase text-(--color-saheli-text)"
         >
-          {data.user?.email}
+          {data.isGuest ? "GUEST MODE" : data.user?.email}
         </p>
       </div>
       <div class="flex flex-col gap-2">
@@ -143,13 +143,13 @@
         /><line x1="3" y1="18" x2="21" y2="18" /></svg
       >
     </button>
-    <div class="flex items-center gap-2">
+    <a href="/" class="flex items-center gap-2">
       <SaheliLogoIcon class="w-8 h-8 text-(--color-saheli-text)" />
       <span
         class="text-2xl font-black tracking-tighter text-(--color-saheli-text)"
         >SAHELI</span
       >
-    </div>
+    </a>
     {#if currentPath !== "/dashboard"}
       <a
         href="/dashboard/assistant"
@@ -209,12 +209,12 @@
         >
           <div class="px-2">
             <p class="text-lg font-black truncate text-(--color-saheli-text)">
-              {data.profile?.username || "USER"}
+              {data.profile?.username || data.display_name_fallback || "USER"}
             </p>
             <p
               class="text-[10px] font-bold opacity-50 truncate uppercase text-(--color-saheli-text)"
             >
-              {data.user?.email}
+              {data.isGuest ? "GUEST MODE" : data.user?.email}
             </p>
           </div>
           <div class="flex flex-col gap-2">
