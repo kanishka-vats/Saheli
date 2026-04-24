@@ -1,6 +1,6 @@
 # Saheli
 
-A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI. Track your periods, log your moods, and talk to an AI companion that understands your cycle — in English, Hindi, or Hinglish.
+A menstrual health assistant web app built with SvelteKit, Supabase, and Groq AI. Track your periods, log your moods, and talk to an AI companion that uses your data to provide supportive, personalized responses in English, Hindi, or Hinglish.
 
 ![Homepage](screenshots/Homepage.png)
 
@@ -78,7 +78,7 @@ PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY="your-supabase-anon-key"
 
 This creates four tables (`profiles`, `period_logs`, `mood_logs`, `chat_history`) with Row Level Security policies and an auto-profile trigger.
 
-### 6. Disable email confirmation (optional but recommended)
+### 6. Disable email confirmation (optional but recommended for local testing)
 
 1. In Supabase, go to **Authentication > Providers > Email**.
 2. Uncheck **Confirm email**.
@@ -127,3 +127,9 @@ When you send a message (text or voice), the `/api/chat` endpoint:
 4. **Calls LLaMA 3.1** via Groq with the context-enriched prompt.
 5. **Saves** both your message and the AI response to chat history.
 6. **Speaks** the response aloud using the Web Speech API.
+
+## Limitations
+
+- AI responses are non-medical and may not always be accurate
+- Predictions are based on simple cycle averaging, not medical models
+- Designed for personal tracking, not clinical use
