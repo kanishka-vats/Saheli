@@ -21,15 +21,26 @@ export const actions: Actions = {
 			return fail(401, { message: 'Unauthorized' });
 		}
 
-		// Use the service role key to bypass RLS and delete the user from auth.users
-		// The cascade constraints in the DB will clean up the profiles and logs
+		// Preferred path: authenticated user calls a SECURITY DEFINER DB function
+		// to delete their own auth user record (and cascading data).
+		const { error: rpcError } = await locals.supabase.rpc('delete_my_account');
+		if (!rpcError) {
+			await locals.supabase.auth.signOut();
+			for (const cookie of cookies.getAll()) {
+				if (cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token')) {
+					cookies.delete(cookie.name, { path: '/' });
+				}
+			}
+			throw redirect(303, '/login');
+		}
+
+		// Fallback path: service role admin deletion (for older DB setups without RPC).
 		const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 		const supabaseUrl = PUBLIC_SUPABASE_URL;
-		
+
 		if (!serviceRoleKey || !supabaseUrl) {
-			return fail(500, {
-				message: 'Server configuration missing for account deletion.'
-			});
+			console.error('RPC delete_my_account failed and service role fallback unavailable:', rpcError);
+			return fail(500, { message: 'Failed to delete account. Please contact support.' });
 		}
 
 		const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
@@ -42,8 +53,8 @@ export const actions: Actions = {
 		const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
 		if (error) {
-			console.error('Error deleting user:', error);
-			return fail(500, { message: 'Failed to delete account. Please ensure SUPABASE_SERVICE_ROLE_KEY is configured.' });
+			console.error('Error deleting user (RPC + admin fallback failed):', { rpcError, error });
+			return fail(500, { message: 'Failed to delete account. Please try again.' });
 		}
 
 		// Clear auth session cookies after deletion.
