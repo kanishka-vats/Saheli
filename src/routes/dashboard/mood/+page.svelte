@@ -4,11 +4,12 @@
   import { createSupabaseBrowserClient } from "$lib/supabase/client";
   import { deserialize } from "$app/forms";
 
+  import { guestMoodLogs } from "$lib/stores/guestStore.svelte";
+
   let { data } = $props();
   const supabase = createSupabaseBrowserClient();
-  let guestMoodLogs = $state<any[]>([]);
 
-  const moodLogs = $derived(data.session ? data.moodLogs : [...guestMoodLogs, ...data.moodLogs]);
+  const moodLogs = $derived(data.session ? data.moodLogs : [...guestMoodLogs.value, ...data.moodLogs]);
 
   async function handleSave(checkinData: {
     mood_score: number;
@@ -19,14 +20,14 @@
     const today = new Date().toISOString().split("T")[0];
 
     if (!data.session) {
-      guestMoodLogs = [{
+      guestMoodLogs.value = [{
         id: Math.random().toString(36).substr(2, 9),
         mood_score: checkinData.mood_score,
         energy: checkinData.energy,
         symptoms: checkinData.symptoms,
         notes: checkinData.notes || null,
         date: today
-      }, ...guestMoodLogs];
+      }, ...guestMoodLogs.value];
       return;
     }
 
@@ -49,7 +50,7 @@
     if (!confirm("DELETE THIS ENTRY?")) return;
 
     if (!data.session) {
-      guestMoodLogs = guestMoodLogs.filter(log => log.id !== id);
+      guestMoodLogs.value = guestMoodLogs.value.filter(log => log.id !== id);
       return;
     }
 

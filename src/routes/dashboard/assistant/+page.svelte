@@ -162,6 +162,7 @@
         <VoiceAssistant
           chatHistory={currentHistory}
           languagePref={data.languagePref}
+          isGuest={!data.session}
         />
       {/key}
     </div>

@@ -8,12 +8,10 @@ const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		const { session, user } = await locals.safeGetSession();
-		if (!session || !user) {
-			return json({ error: 'Unauthorized' }, { status: 401 });
-		}
+    const { session, user } = await locals.safeGetSession();
+    const isGuest = !session || !user;
 
-		let userText = '';
+    let userText = "";
 
 		// Determine if audio or text
 		const contentType = request.headers.get('content-type') || '';
@@ -55,35 +53,40 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'No input provided' }, { status: 400 });
 		}
 
-		// ── Fetch Context: Last 3 months of period & mood logs ──
-		const threeMonthsAgo = new Date();
-		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-		const dateStr = threeMonthsAgo.toISOString().split('T')[0];
+    let periodLogs: any[] = [];
+    let moodLogs: any[] = [];
+    let profile: any = null;
 
-		const [periodResult, moodResult, profileResult] = await Promise.all([
-			locals.supabase
-				.from('period_logs')
-				.select('start_date, end_date, flow_intensity')
-				.eq('user_id', user.id)
-				.gte('start_date', dateStr)
-				.order('start_date', { ascending: false }),
-			locals.supabase
-				.from('mood_logs')
-				.select('date, mood_score, energy, symptoms, notes')
-				.eq('user_id', user.id)
-				.gte('date', dateStr)
-				.order('date', { ascending: false })
-				.limit(30),
-			locals.supabase
-				.from('profiles')
-				.select('display_name, language_pref, avg_cycle_length')
-				.eq('id', user.id)
-				.maybeSingle()
-		]);
+    if (!isGuest && user) {
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      const dateStr = threeMonthsAgo.toISOString().split("T")[0];
 
-		const periodLogs = periodResult.data ?? [];
-		const moodLogs = moodResult.data ?? [];
-		const profile = profileResult.data;
+      const [periodResult, moodResult, profileResult] = await Promise.all([
+        locals.supabase
+          .from("period_logs")
+          .select("start_date, end_date, flow_intensity")
+          .eq("user_id", user.id)
+          .gte("start_date", dateStr)
+          .order("start_date", { ascending: false }),
+        locals.supabase
+          .from("mood_logs")
+          .select("date, mood_score, energy, symptoms, notes")
+          .eq("user_id", user.id)
+          .gte("date", dateStr)
+          .order("date", { ascending: false })
+          .limit(30),
+        locals.supabase
+          .from("profiles")
+          .select("display_name, language_pref, avg_cycle_length")
+          .eq("id", user.id)
+          .maybeSingle(),
+      ]);
+
+      periodLogs = periodResult.data ?? [];
+      moodLogs = moodResult.data ?? [];
+      profile = profileResult.data;
+    }
 
 		// ── Compute cycle context ──
 		let cycleContext = 'No period data available yet.';
@@ -156,19 +159,21 @@ You're an AI bestie, not a doctor. When giving health advice, casually mention t
 
 		const assistantText = chatCompletion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
 
-		// ── Save to chat_history ──
-		await Promise.all([
-			locals.supabase.from('chat_history').insert({
-				user_id: user.id,
-				role: 'user',
-				content: userText
-			}),
-			locals.supabase.from('chat_history').insert({
-				user_id: user.id,
-				role: 'assistant',
-				content: assistantText
-			})
-		]);
+    // ── Save to chat_history ──
+    if (!isGuest && user) {
+      await Promise.all([
+        locals.supabase.from("chat_history").insert({
+          user_id: user.id,
+          role: "user",
+          content: userText,
+        }),
+        locals.supabase.from("chat_history").insert({
+          user_id: user.id,
+          role: "assistant",
+          content: assistantText,
+        }),
+      ]);
+    }
 
 		return json({ userText, assistantText });
 	} catch (err: any) {

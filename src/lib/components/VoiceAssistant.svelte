@@ -3,6 +3,8 @@
   import SaheliLogoIcon from "$lib/components/icons/SaheliLogoIcon.svelte";
   import MicIcon from "$lib/components/icons/MicIcon.svelte";
 
+  import { guestChatCount } from "$lib/stores/guestStore.svelte";
+
   type ChatMessage = {
     role: "user" | "assistant";
     content: string;
@@ -11,9 +13,11 @@
   let {
     chatHistory = [],
     languagePref = "en",
+    isGuest = false,
   }: {
     chatHistory: ChatMessage[];
     languagePref: string;
+    isGuest?: boolean;
   } = $props();
 
   // svelte-ignore state_referenced_locally
@@ -135,9 +139,18 @@
   }
 
   async function sendAudio(blob: Blob) {
+    if (isGuest && guestChatCount.value >= 3) {
+      errorMessage = "LIMIT REACHED! PLEASE LOGIN TO CONTINUE CHATTING WITH SAHELI.";
+      isProcessing = false;
+      return;
+    }
+
     isProcessing = true;
     errorMessage = "";
     try {
+      if (isGuest) {
+        guestChatCount.value++;
+      }
       const formData = new FormData();
       formData.append("audio", blob, "recording.webm");
       const res = await fetch("/api/chat", { method: "POST", body: formData });
@@ -166,7 +179,11 @@
   }
 
   async function sendText() {
-    if (!textInput.trim()) return;
+    if (isGuest && guestChatCount.value >= 3) {
+      errorMessage = "LIMIT REACHED! PLEASE LOGIN TO CONTINUE CHATTING WITH SAHELI.";
+      return;
+    }
+
     const text = textInput.trim();
     textInput = "";
     errorMessage = "";
@@ -174,6 +191,9 @@
     scrollToBottom();
     isProcessing = true;
     try {
+      if (isGuest) {
+        guestChatCount.value++;
+      }
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -355,12 +375,18 @@
       </div>
     {/if}
 
-    {#if errorMessage}
-      <div
-        class="p-2 border-2 border-black bg-red-100 text-red-900 font-black text-[9px] uppercase text-center"
-      >
-        ERROR: {errorMessage}
-      </div>
+      {#if isGuest && guestChatCount.value >= 3}
+        <div class="p-4 border-4 border-black bg-(--color-saheli-yellow) space-y-3 shadow-brutal animate-bounce">
+          <p class="font-black text-sm uppercase text-center">LIMIT REACHED! LOGIN TO CONTINUE YOUR CHAT WITH SAHELI.</p>
+          <a href="/login" class="brutal-btn w-full bg-black text-white py-3! text-center block">LOGIN / SIGNUP</a>
+        </div>
+      {:else}
+        <div
+          class="p-2 border-2 border-black bg-red-100 text-red-900 font-black text-[9px] uppercase text-center"
+        >
+          ERROR: {errorMessage}
+        </div>
+      {/if}
     {/if}
   </div>
 

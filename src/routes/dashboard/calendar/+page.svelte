@@ -4,11 +4,12 @@
   import { invalidateAll } from '$app/navigation';
   import { createSupabaseBrowserClient } from '$lib/supabase/client';
 
+  import { guestPeriodLogs } from '$lib/stores/guestStore.svelte';
+  
   let { data } = $props();
   const supabase = createSupabaseBrowserClient();
-  let guestPeriodLogs = $state<any[]>([]);
 
-  const periodLogs = $derived(data.session ? data.periodLogs : [...guestPeriodLogs, ...data.periodLogs]);
+  const periodLogs = $derived(data.session ? data.periodLogs : [...guestPeriodLogs.value, ...data.periodLogs]);
 
   let startDate = $state('');
   let showModal = $state(false);
@@ -31,8 +32,8 @@
 
     if (!data.session) {
       // Guest mode
-      guestPeriodLogs = guestPeriodLogs.filter(l => l.start_date !== startDate);
-      guestPeriodLogs = [...guestPeriodLogs, {
+      const filtered = guestPeriodLogs.value.filter(l => l.start_date !== startDate);
+      guestPeriodLogs.value = [...filtered, {
         id: Math.random().toString(36).substr(2, 9),
         start_date: startDate,
         end_date: null,
