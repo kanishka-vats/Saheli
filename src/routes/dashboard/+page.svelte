@@ -5,11 +5,13 @@
   import MoodIcon from "$lib/components/icons/MoodIcon.svelte";
   import MicIcon from "$lib/components/icons/MicIcon.svelte";
   import { createSupabaseBrowserClient } from "$lib/supabase/client";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
+  import { enhance } from "$app/forms";
+  import type { SubmitFunction } from "@sveltejs/kit";
   import { z } from "zod";
   import { profileSchema } from "$lib/schemas";
 
-  let { data } = $props();
+  let { data, form } = $props();
   const supabase = createSupabaseBrowserClient();
 
   // Simple state for typewriter greeting
@@ -56,6 +58,7 @@
   let saving = $state(false);
   let saveStatus = $state<"success" | "error" | null>(null);
   let errorMessage = $state("");
+  let deleteStatus = $state<"idle" | "deleting" | "success" | "error">("idle");
 
   async function updateProfile() {
     if (saving) return;
@@ -114,6 +117,29 @@
     }
     saving = false;
   }
+
+  const enhanceDeleteAccount: SubmitFunction = () => {
+    deleteStatus = "deleting";
+    errorMessage = "";
+
+    return async ({ result }) => {
+      if (result.type === "redirect") {
+        deleteStatus = "success";
+        await new Promise((resolve) => setTimeout(resolve, 900));
+        await goto(result.location, { replaceState: true });
+        return;
+      }
+
+      if (result.type === "failure") {
+        deleteStatus = "error";
+        errorMessage = result.data?.message || "Failed to delete account.";
+        return;
+      }
+
+      deleteStatus = "error";
+      errorMessage = "Failed to delete account.";
+    };
+  };
 </script>
 
 <div class="flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
@@ -375,7 +401,8 @@
       <form
         method="POST"
         action="?/deleteAccount"
-        onsubmit={(e) => {
+        use:enhance={enhanceDeleteAccount}
+        onsubmit={(e: SubmitEvent) => {
           if (
             !confirm(
               "DELETE YOUR ACCOUNT PERMANENTLY? THIS CANNOT BE UNDONE.",
@@ -387,16 +414,29 @@
       >
         <button
           type="submit"
+          disabled={deleteStatus === "deleting"}
           class="brutal-btn w-full bg-red-600! text-white! py-3! text-sm"
         >
-          DELETE ACCOUNT
+          {deleteStatus === "deleting" ? "DELETING ACCOUNT..." : "DELETE ACCOUNT"}
         </button>
       </form>
+      {#if deleteStatus === "success"}
+        <p class="text-[10px] text-green-700 font-bold uppercase text-center mt-2">
+          ACCOUNT DELETED. REDIRECTING TO LOGIN...
+        </p>
+      {/if}
       {#if errorMessage}
         <p
           class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
         >
           {errorMessage}
+        </p>
+      {/if}
+      {#if form?.message}
+        <p
+          class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
+        >
+          {form.message}
         </p>
       {/if}
     </div>

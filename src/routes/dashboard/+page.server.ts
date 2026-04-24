@@ -1,7 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '$env/dynamic/private';
-import { env as publicEnv } from '$env/dynamic/public';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -24,7 +24,7 @@ export const actions: Actions = {
 		// Use the service role key to bypass RLS and delete the user from auth.users
 		// The cascade constraints in the DB will clean up the profiles and logs
 		const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
-		const supabaseUrl = publicEnv.PUBLIC_SUPABASE_URL;
+		const supabaseUrl = PUBLIC_SUPABASE_URL;
 		
 		if (!serviceRoleKey || !supabaseUrl) {
 			return fail(500, {
@@ -46,8 +46,13 @@ export const actions: Actions = {
 			return fail(500, { message: 'Failed to delete account. Please ensure SUPABASE_SERVICE_ROLE_KEY is configured.' });
 		}
 
-		// Clear the session and redirect
+		// Clear auth session cookies after deletion.
 		await locals.supabase.auth.signOut();
+		for (const cookie of cookies.getAll()) {
+			if (cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token')) {
+				cookies.delete(cookie.name, { path: '/' });
+			}
+		}
 		
 		throw redirect(303, '/login');
 	}
