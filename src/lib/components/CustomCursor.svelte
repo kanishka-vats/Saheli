@@ -34,8 +34,8 @@
     left: 0;
     width: 12px;
     height: 12px;
-    background: #ffffff;
-    border: 2px solid #000000;
+    background: var(--color-saheli-bg);
+    border: 2px solid var(--color-saheli-border);
     border-radius: 50%;
     pointer-events: none;
     z-index: 99999;

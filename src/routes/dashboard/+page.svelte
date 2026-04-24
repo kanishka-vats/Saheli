@@ -4,6 +4,7 @@
   import CalendarIcon from "$lib/components/icons/CalendarIcon.svelte";
   import MoodIcon from "$lib/components/icons/MoodIcon.svelte";
   import MicIcon from "$lib/components/icons/MicIcon.svelte";
+  import VoiceAssistant from "$lib/components/VoiceAssistant.svelte";
   import { createSupabaseBrowserClient } from "$lib/supabase/client";
   import { goto, invalidateAll } from "$app/navigation";
   import { enhance } from "$app/forms";
@@ -142,33 +143,42 @@
   };
 </script>
 
-<div class="flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
+<div class="flex flex-col gap-5 lg:h-[calc(100dvh-4rem)]">
   <!-- Header -->
   <header
-    class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b-4 border-(--color-saheli-border) pb-4 shrink-0"
+    class="flex items-center gap-2 border-b-2 border-(--color-saheli-border) pb-2 shrink-0 w-full"
   >
-    <div class="min-w-0 flex-1">
-      <div
-        class="inline-block px-2 py-0.5 bg-black text-white font-black text-[10px] uppercase tracking-widest mb-2"
-      >
-        STATUS: ACTIVE
-      </div>
+    <div class="min-w-0 flex-1 overflow-hidden">
       <h1
-        class="text-2xl md:text-4xl lg:text-5xl font-black leading-none tracking-tighter truncate w-full"
+        class="text-lg md:text-xl lg:text-2xl font-black leading-tight tracking-tight truncate w-full"
       >
         {greeting}<span class="animate-pulse">_</span>
       </h1>
     </div>
-    <div class="flex gap-3">
+    <div class="shrink-0 ml-auto">
       <button
         onclick={() => (showSettings = true)}
-        class="brutal-btn bg-[--color-saheli-yellow] text-xs md:text-sm"
+        class="brutal-btn bg-[--color-saheli-yellow] text-[9px] md:text-[10px] px-2.5! py-1.5! tracking-wide"
         aria-label="Open Settings"
       >
         SETTINGS
       </button>
     </div>
   </header>
+
+  <!-- Quick Stats Grid -->
+  <section
+    class="brutal-card no-card-shift border-2 border-(--color-saheli-border) overflow-hidden shrink-0 shadow-[0_20px_42px_rgba(186,120,146,0.32)]"
+    style="background: color-mix(in oklab, var(--color-saheli-secondary, var(--color-saheli-yellow)) 52%, var(--color-saheli-surface) 48%);"
+  >
+    <div class="h-[360px] md:h-[420px] lg:h-[480px] p-3 md:p-4">
+      <VoiceAssistant
+        chatHistory={[]}
+        languagePref={data.profile?.language_pref || "en"}
+        isGuest={data.isGuest}
+      />
+    </div>
+  </section>
 
   <!-- Quick Stats Grid -->
   <div
@@ -194,14 +204,14 @@
           DAY {cycleDay}
         </h2>
         <p
-          class="text-sm lg:text-lg font-black border-t-2 border-black pt-2 uppercase text-[--color-saheli-text]"
+          class="text-sm lg:text-lg font-black border-t-2 border-(--color-saheli-border) pt-2 uppercase text-[--color-saheli-text]"
         >
           {cycleStatus}
         </p>
       </div>
       <a
         href="/dashboard/calendar"
-        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 w-full py-2! text-center text-xs"
         >LOG PERIOD</a
       >
     </div>
@@ -231,14 +241,14 @@
       </div>
       <a
         href="/dashboard/mood"
-        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 w-full py-2! text-center text-xs"
         >LOG MOOD</a
       >
     </div>
 
     <!-- AI Assistant Card -->
     <div
-      class="brutal-card no-card-shift p-4 bg-white text-[--color-saheli-text] flex flex-col justify-between h-full sm:col-span-2 lg:col-span-1 border-b-8 border-r-8 border-black overflow-hidden"
+      class="brutal-card no-card-shift p-4 bg-(--color-saheli-surface) text-[--color-saheli-text] flex flex-col justify-between h-full sm:col-span-2 lg:col-span-1 border-b-8 border-r-8 border-(--color-saheli-border) overflow-hidden"
     >
       <div>
         <div class="flex items-center justify-between mb-2 lg:mb-4">
@@ -261,7 +271,7 @@
       </div>
       <a
         href="/dashboard/assistant"
-        class="brutal-btn bg-black text-[--color-saheli-text] mt-4 w-full py-2! text-center text-xs"
+        class="brutal-btn bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-4 w-full py-2! text-center text-xs"
         >START CHAT →</a
       >
     </div>
@@ -281,7 +291,7 @@
         >
           <div class="flex items-center gap-3 md:gap-6">
             <div
-              class="w-8 h-8 md:w-12 md:h-12 bg-(--color-saheli-yellow) border-2 border-black flex items-center justify-center font-black text-sm"
+              class="w-8 h-8 md:w-12 md:h-12 bg-(--color-saheli-yellow) border-2 border-(--color-saheli-border) flex items-center justify-center font-black text-sm"
             >
               {log.mood_score}
             </div>
@@ -320,7 +330,7 @@
 
 {#if showSettings}
   <div
-    class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-100 backdrop-blur-sm"
+    class="fixed inset-0 bg-(--color-saheli-text)/80 flex items-center justify-center p-4 z-100 backdrop-blur-sm"
   >
     <div
       class="brutal-card no-card-shift p-8 bg-(--color-saheli-surface) max-w-md w-full space-y-6 animate-brutal-up border-4 border-(--color-saheli-border) relative"
@@ -328,7 +338,7 @@
       <button
         type="button"
         onclick={() => (showSettings = false)}
-        class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-red-500 flex items-center justify-center font-black text-2xl"
+        class="absolute top-4 right-4 w-10 h-10 border-4 border-(--color-saheli-border) bg-(--color-saheli-accent) text-(--color-saheli-bg) flex items-center justify-center font-black text-2xl"
         aria-label="Close Settings"
       >
         ×
@@ -344,7 +354,7 @@
             id="username-input"
             type="text"
             bind:value={newUsername}
-            class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+            class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-(--color-saheli-text) outline-none transition-colors"
             placeholder="YOUR NAME"
           />
         </div>
@@ -358,7 +368,7 @@
               id="cycle-input"
               type="number"
               bind:value={avgCycleLength}
-              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-(--color-saheli-text) outline-none transition-colors"
               min="20"
               max="45"
             />
@@ -372,7 +382,7 @@
               id="period-input"
               type="number"
               bind:value={periodLength}
-              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-black outline-none transition-colors"
+              class="w-full border-4 border-(--color-saheli-border) p-3 font-black text-lg bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) focus:text-(--color-saheli-text) outline-none transition-colors"
               min="1"
               max="10"
             />
@@ -383,9 +393,9 @@
         onclick={updateProfile}
         disabled={saving}
         class="brutal-btn w-full {saveStatus === 'success'
-          ? 'bg-green-500'
+          ? 'bg-(--color-saheli-yellow)'
           : saveStatus === 'error'
-            ? 'bg-red-500'
+            ? 'bg-(--color-saheli-accent)'
             : 'bg-(--color-saheli-primary)'} py-4! text-lg! disabled:opacity-50"
       >
         {#if saving}
@@ -415,26 +425,26 @@
         <button
           type="submit"
           disabled={deleteStatus === "deleting"}
-          class="brutal-btn w-full bg-red-600! text-white! py-3! text-sm"
+          class="brutal-btn w-full bg-(--color-saheli-accent)! text-(--color-saheli-bg)! py-3! text-sm"
         >
           {deleteStatus === "deleting" ? "DELETING ACCOUNT..." : "DELETE ACCOUNT"}
         </button>
       </form>
       {#if deleteStatus === "success"}
-        <p class="text-[10px] text-green-700 font-bold uppercase text-center mt-2">
+        <p class="text-[10px] text-(--color-saheli-primary) font-bold uppercase text-center mt-2">
           ACCOUNT DELETED. REDIRECTING TO LOGIN...
         </p>
       {/if}
       {#if errorMessage}
         <p
-          class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
+          class="text-[10px] text-(--color-saheli-accent) font-bold uppercase text-center mt-2"
         >
           {errorMessage}
         </p>
       {/if}
       {#if form?.message}
         <p
-          class="text-[10px] text-red-600 font-bold uppercase text-center mt-2"
+          class="text-[10px] text-(--color-saheli-accent) font-bold uppercase text-center mt-2"
         >
           {form.message}
         </p>

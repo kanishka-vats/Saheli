@@ -131,7 +131,7 @@
   >
     <div class="flex-1 text-center lg:text-left space-y-4 md:space-y-6">
       <div
-        class="inline-block px-2 py-0.5 bg-black text-white font-black text-[9px] md:text-xs uppercase tracking-widest"
+        class="inline-block px-2 py-0.5 bg-(--color-saheli-primary) text-(--color-saheli-bg) font-black text-[9px] md:text-xs uppercase tracking-widest"
       >
         2026 EDITION
       </div>
@@ -172,16 +172,16 @@
         class="brutal-card p-4 bg-(--color-saheli-yellow) sm:-rotate-1 hover:rotate-0 transition-transform"
       >
         <CalendarIcon class="w-8 h-8 mb-3" />
-        <h3 class="text-lg font-black mb-1 text-black">CALENDAR</h3>
+        <h3 class="text-lg font-black mb-1 text-(--color-saheli-text)">CALENDAR</h3>
         <p class="font-bold text-[10px] uppercase opacity-70">
           NO FLUFF. JUST DATES.
         </p>
       </div>
 
       <div
-        class="brutal-card p-4 bg-black text-white sm:rotate-1 hover:rotate-0 transition-transform"
+        class="brutal-card p-4 bg-(--color-saheli-accent) text-(--color-saheli-text) sm:rotate-1 hover:rotate-0 transition-transform"
       >
-        <MoodIcon class="w-8 h-8 mb-3 text-black" />
+        <MoodIcon class="w-8 h-8 mb-3 text-(--color-saheli-text)" />
         <h3 class="text-lg font-black mb-1">MOOD</h3>
         <p class="font-bold text-[10px] uppercase opacity-70">
           HOW DO YOU FEEL?
@@ -195,9 +195,9 @@
           class="flex flex-col sm:flex-row items-start sm:items-center gap-3"
         >
           <div
-            class="w-10 h-10 bg-(--color-saheli-primary) border-2 border-black flex items-center justify-center"
+            class="w-10 h-10 bg-(--color-saheli-primary) border-2 border-(--color-saheli-border) flex items-center justify-center"
           >
-            <MicIcon class="w-5 h-5 text-white" />
+            <MicIcon class="w-5 h-5 text-(--color-saheli-bg)" />
           </div>
           <div>
             <h3 class="text-xl font-black text-(--color-saheli-text)">
@@ -213,7 +213,7 @@
   </main>
 
   <!-- Footer Marquee -->
-  <div class="marquee bg-black text-white mt-auto">
+  <div class="marquee bg-(--color-saheli-primary) text-(--color-saheli-bg) mt-auto">
     <div class="marquee-content" style="animation-duration: 10s;">
       SAHELI • SAHELI • SAHELI • SAHELI • SAHELI • SAHELI • SAHELI • SAHELI •
       SAHELI • SAHELI • SAHELI • SAHELI •
@@ -225,8 +225,8 @@
   .marquee {
     white-space: nowrap;
     overflow: hidden;
-    border-top: 4px solid #000000;
-    border-bottom: 4px solid #000000;
+    border-top: 4px solid var(--color-saheli-border);
+    border-bottom: 4px solid var(--color-saheli-border);
     background: var(--color-saheli-primary);
     padding: 0.75rem 0;
     z-index: 10;
@@ -236,7 +236,7 @@
     display: inline-block;
     animation: marquee 30s linear infinite;
     font-size: 1.5rem;
-    font-weight: 900;
+    font-weight: 700;
     text-transform: uppercase;
     padding-left: 100%;
   }

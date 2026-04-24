@@ -66,9 +66,9 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
-  <header class="border-b-4 md:border-b-8 border-black pb-4 md:pb-8 shrink-0">
+  <header class="border-b-4 md:border-b-8 border-(--color-saheli-border) pb-4 md:pb-8 shrink-0">
     <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-      <div class="w-12 h-12 md:w-16 md:h-16 bg-black text-white flex items-center justify-center border-2 md:border-4 border-black shadow-brutal">
+      <div class="w-12 h-12 md:w-16 md:h-16 bg-(--color-saheli-primary) text-(--color-saheli-bg) flex items-center justify-center border-2 md:border-4 border-(--color-saheli-border) shadow-brutal">
         <CalendarIcon class="w-6 h-6 md:w-8 md:h-8" />
       </div>
       <h1 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase">CALENDAR</h1>
@@ -91,14 +91,14 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in"
+    class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-(--color-saheli-text)/80 backdrop-blur-sm animate-fade-in"
     onclick={closeModal}
   >
     <div
-      class="w-full max-w-lg brutal-card bg-white p-10 cursor-auto text-left"
+      class="w-full max-w-lg brutal-card bg-(--color-saheli-surface) p-10 cursor-auto text-left"
       onclick={(e) => e.stopPropagation()}
     >
-      <h3 id="modal-title" class="text-4xl font-black mb-8 border-b-4 border-black pb-4 uppercase">
+      <h3 id="modal-title" class="text-4xl font-black mb-8 border-b-4 border-(--color-saheli-border) pb-4 uppercase">
         LOGGING: {startDate}
       </h3>
 
@@ -110,7 +110,7 @@
           <input
             id="flow-intensity" type="range" min="0" max="5" step="1"
             bind:value={flowIntensity}
-            class="w-full h-4 bg-black appearance-none cursor-pointer border-4 border-black"
+            class="w-full h-4 bg-(--color-saheli-primary) appearance-none cursor-pointer border-4 border-(--color-saheli-border)"
           />
         </div>
         <div class="flex justify-between font-black text-xs mt-2 uppercase">
@@ -119,8 +119,8 @@
       </div>
 
       <div class="flex gap-4">
-        <button type="button" onclick={closeModal} class="brutal-btn flex-1 bg-white py-4!">CANCEL</button>
-        <button type="button" onclick={savePeriodLog} disabled={saving} class="brutal-btn flex-1 bg-black text-white py-4! disabled:opacity-50">
+        <button type="button" onclick={closeModal} class="brutal-btn flex-1 bg-(--color-saheli-surface) text-(--color-saheli-text) py-4!">CANCEL</button>
+        <button type="button" onclick={savePeriodLog} disabled={saving} class="brutal-btn flex-1 bg-(--color-saheli-primary) text-(--color-saheli-bg) py-4! disabled:opacity-50">
           {saving ? 'SAVING...' : 'CONFIRM LOG'}
         </button>
       </div>
@@ -136,7 +136,7 @@
     width: 24px;
     height: 32px;
     background: var(--color-saheli-primary);
-    border: 4px solid black;
+    border: 4px solid var(--color-saheli-border);
     cursor: pointer;
   }
 </style>

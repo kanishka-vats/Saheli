@@ -66,9 +66,9 @@
 <div class="h-[calc(100dvh-6rem)] md:h-[calc(100dvh-10rem)] flex flex-col md:flex-row gap-6">
 
   <!-- Mobile Sidebar Toggle -->
-  <div class="md:hidden flex justify-between items-center bg-white border-4 border-black p-4 brutal-card shrink-0">
+  <div class="md:hidden flex justify-between items-center bg-(--color-saheli-surface) border-4 border-(--color-saheli-border) p-4 brutal-card shrink-0">
     <div class="flex items-center gap-2">
-      <SaheliLogoIcon class="w-6 h-6 text-black" />
+      <SaheliLogoIcon class="w-6 h-6 text-(--color-saheli-text)" />
       <span class="font-black tracking-tighter uppercase">AI ASSISTANT</span>
     </div>
     <button onclick={() => chatSidebarOpen = !chatSidebarOpen} class="brutal-btn p-2! bg-(--color-saheli-yellow)" aria-label="Toggle Sidebar">
@@ -78,24 +78,24 @@
 
   <!-- ───── Desktop Sidebar (Side-by-Side) / Mobile Drawer ───── -->
   {#if chatSidebarOpen}
-    <button class="md:hidden fixed inset-0 bg-black/80 z-40 cursor-default" onclick={() => chatSidebarOpen = false} onkeydown={(e) => e.key === 'Escape' && (chatSidebarOpen = false)} aria-label="Close Sidebar"></button>
+    <button class="md:hidden fixed inset-0 bg-(--color-saheli-text)/80 z-40 cursor-default" onclick={() => chatSidebarOpen = false} onkeydown={(e) => e.key === 'Escape' && (chatSidebarOpen = false)} aria-label="Close Sidebar"></button>
   {/if}
 
   <aside class="
     {chatSidebarOpen ? 'flex fixed inset-y-0 left-0 z-50 animate-slide-left w-72' : 'hidden md:flex md:w-64 lg:w-72'} 
-    flex-col bg-white border-4 border-black brutal-card no-card-shift shrink-0"
+    flex-col bg-(--color-saheli-surface) border-4 border-(--color-saheli-border) brutal-card no-card-shift shrink-0"
   >
     <!-- Header -->
-    <div class="p-4 border-b-4 border-black bg-(--color-saheli-primary) flex items-center justify-between">
+    <div class="p-4 border-b-4 border-(--color-saheli-border) bg-(--color-saheli-primary) flex items-center justify-between">
       <h2 class="text-xl font-black tracking-tighter uppercase">CHATS</h2>
-      <button aria-label="Close Sidebar" onclick={() => chatSidebarOpen = false} class="md:hidden brutal-btn p-1! bg-white">
+      <button aria-label="Close Sidebar" onclick={() => chatSidebarOpen = false} class="md:hidden brutal-btn p-1! bg-(--color-saheli-surface)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
 
     <!-- New Chat -->
-    <div class="p-4 border-b-4 border-black">
-      <button onclick={startNewChat} class="brutal-btn w-full bg-black! text-white! py-3! gap-2">
+    <div class="p-4 border-b-4 border-(--color-saheli-border)">
+      <button onclick={startNewChat} class="brutal-btn w-full bg-(--color-saheli-primary)! text-(--color-saheli-bg)! py-3! gap-2">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         NEW CHAT
       </button>
@@ -106,14 +106,14 @@
       {#each chatSessions as session}
         <div class="relative group">
           <button
-            class="w-full flex items-center justify-between p-3 border-2 border-black font-bold text-sm uppercase text-left transition-colors hover:bg-(--color-saheli-yellow) focus:bg-(--color-saheli-yellow) outline-none"
+            class="w-full flex items-center justify-between p-3 border-2 border-(--color-saheli-border) font-bold text-sm uppercase text-left transition-colors hover:bg-(--color-saheli-yellow) focus:bg-(--color-saheli-yellow) outline-none"
             onclick={() => { currentHistory = session.messages as any; chatSidebarOpen = false; chatKey++; }}
           >
             <span class="truncate pr-6">{session.title}</span>
           </button>
           
           <button
-            class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-white border-2 border-black hover:bg-black hover:text-white transition-colors"
+            class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-(--color-saheli-surface) border-2 border-(--color-saheli-border) hover:bg-(--color-saheli-primary) hover:text-(--color-saheli-bg) transition-colors"
             aria-label="Options"
             onclick={(e) => { e.stopPropagation(); activeMenuId = activeMenuId === session.id ? null : session.id; }}
           >
@@ -124,10 +124,10 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
-              class="absolute right-0 top-full mt-1 w-32 bg-white border-4 border-black shadow-brutal z-10"
+              class="absolute right-0 top-full mt-1 w-32 bg-(--color-saheli-surface) border-4 border-(--color-saheli-border) shadow-brutal z-10"
               onclick={(e) => e.stopPropagation()}
             >
-              <button class="w-full text-left px-3 py-2 text-xs font-black uppercase hover:bg-(--color-saheli-yellow) border-b-2 border-black" onclick={() => { showDeleteModal = session.id; activeMenuId = null; }}>
+              <button class="w-full text-left px-3 py-2 text-xs font-black uppercase hover:bg-(--color-saheli-yellow) border-b-2 border-(--color-saheli-border)" onclick={() => { showDeleteModal = session.id; activeMenuId = null; }}>
                 DELETE
               </button>
               <button class="w-full text-left px-3 py-2 text-xs font-black uppercase hover:bg-(--color-saheli-yellow)" onclick={() => startRename(session.id)}>
@@ -141,13 +141,13 @@
   </aside>
 
   <!-- ───── Main Chat Area ───── -->
-  <main class="flex-1 brutal-card no-card-shift border-4 border-black bg-white flex flex-col min-h-0 overflow-hidden relative">
+  <main class="flex-1 brutal-card no-card-shift border-4 border-(--color-saheli-border) bg-(--color-saheli-surface) flex flex-col min-h-0 overflow-hidden relative">
     
     <!-- Top Bar -->
-    <div class="p-4 border-b-4 border-black flex items-center justify-between shrink-0 bg-(--color-saheli-bg)">
+    <div class="p-4 border-b-4 border-(--color-saheli-border) flex items-center justify-between shrink-0 bg-(--color-saheli-bg)">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 border-2 border-black bg-white flex items-center justify-center shadow-brutal">
-          <SaheliLogoIcon class="w-6 h-6 text-black" />
+        <div class="w-10 h-10 border-2 border-(--color-saheli-border) bg-(--color-saheli-surface) flex items-center justify-center shadow-brutal">
+          <SaheliLogoIcon class="w-6 h-6 text-(--color-saheli-text)" />
         </div>
         <div>
           <h1 class="text-xl font-black uppercase tracking-tighter">TALK TO SAHELI</h1>
@@ -171,15 +171,15 @@
 
 <!-- Delete Modal -->
 {#if showDeleteModal}
-  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/80 px-4">
-    <div class="w-full max-w-sm brutal-card border-4 border-black bg-white p-6">
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-(--color-saheli-text)/80 px-4">
+    <div class="w-full max-w-sm brutal-card border-4 border-(--color-saheli-border) bg-(--color-saheli-surface) p-6">
       <h3 class="text-2xl font-black mb-2 uppercase">DELETE CHAT?</h3>
       <p class="text-sm font-bold opacity-70 mb-6 uppercase">
         THIS ACTION CANNOT BE UNDONE. FOREVER IS A LONG TIME.
       </p>
       <div class="flex gap-4">
-        <button class="brutal-btn flex-1 bg-white text-black" onclick={() => showDeleteModal = null}>CANCEL</button>
-        <button class="brutal-btn flex-1 bg-red-500 text-white" onclick={() => confirmDelete(showDeleteModal!)}>DELETE</button>
+        <button class="brutal-btn flex-1 bg-(--color-saheli-surface) text-(--color-saheli-text)" onclick={() => showDeleteModal = null}>CANCEL</button>
+        <button class="brutal-btn flex-1 bg-(--color-saheli-accent) text-(--color-saheli-bg)" onclick={() => confirmDelete(showDeleteModal!)}>DELETE</button>
       </div>
     </div>
   </div>
@@ -187,21 +187,21 @@
 
 <!-- Rename Modal -->
 {#if showRenameModal}
-  <div class="fixed inset-0 z-100 flex items-center justify-center bg-black/80 px-4">
-    <div class="w-full max-w-sm brutal-card border-4 border-black bg-white p-6">
+  <div class="fixed inset-0 z-100 flex items-center justify-center bg-(--color-saheli-text)/80 px-4">
+    <div class="w-full max-w-sm brutal-card border-4 border-(--color-saheli-border) bg-(--color-saheli-surface) p-6">
       <h3 class="text-2xl font-black mb-4 uppercase">RENAME CHAT</h3>
       <!-- svelte-ignore a11y_autofocus -->
       <input
         type="text"
         bind:value={newSessionName}
-        class="w-full border-4 border-black p-3 mb-6 font-black uppercase text-sm focus:bg-(--color-saheli-yellow) outline-none transition-colors"
+        class="w-full border-4 border-(--color-saheli-border) p-3 mb-6 font-black uppercase text-sm bg-(--color-saheli-bg) text-(--color-saheli-text) focus:bg-(--color-saheli-yellow) outline-none transition-colors"
         placeholder="NEW NAME..."
         onkeydown={(e) => e.key === 'Enter' && saveRename()}
         autofocus
       />
       <div class="flex gap-4">
-        <button class="brutal-btn flex-1 bg-white text-black" onclick={() => showRenameModal = null}>CANCEL</button>
-        <button class="brutal-btn flex-1 bg-black text-white" onclick={saveRename}>SAVE</button>
+        <button class="brutal-btn flex-1 bg-(--color-saheli-surface) text-(--color-saheli-text)" onclick={() => showRenameModal = null}>CANCEL</button>
+        <button class="brutal-btn flex-1 bg-(--color-saheli-primary) text-(--color-saheli-bg)" onclick={saveRename}>SAVE</button>
       </div>
     </div>
   </div>

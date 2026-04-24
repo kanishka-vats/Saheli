@@ -8,14 +8,12 @@
   import CalendarIcon from "$lib/components/icons/CalendarIcon.svelte";
   import MoodIcon from "$lib/components/icons/MoodIcon.svelte";
   import SaheliLogoIcon from "$lib/components/icons/SaheliLogoIcon.svelte";
-  import VoiceAssistant from "$lib/components/VoiceAssistant.svelte";
   import { onMount } from "svelte";
 
   let { data, children } = $props();
   const supabase = createSupabaseBrowserClient();
 
   let sidebarOpen = $state(false);
-  let assistantOpen = $state(false); // For mobile toggle
   let isDark = $state(false); // Default to light
 
   onMount(() => {
@@ -102,19 +100,19 @@
         {#if data.isGuest}
           <a
             href="/login"
-            class="brutal-btn w-full bg-black! text-white! py-2! text-[10px] text-center"
+            class="brutal-btn w-full bg-(--color-saheli-primary)! text-(--color-saheli-bg)! py-2! text-[10px] text-center"
             >LOGIN</a
           >
         {:else}
           <button
             onclick={signOut}
-            class="brutal-btn w-full bg-black! text-white! py-2! text-[10px]"
+            class="brutal-btn w-full bg-(--color-saheli-primary)! text-(--color-saheli-bg)! py-2! text-[10px]"
             >LOGOUT</button
           >
         {/if}
         <button
           onclick={toggleTheme}
-          class="brutal-btn w-full bg-(--color-saheli-yellow)! py-2! text-[10px] text-black!"
+          class="brutal-btn w-full bg-(--color-saheli-yellow)! py-2! text-[10px] text-(--color-saheli-text)!"
           >{isDark ? "LIGHT" : "DARK"}</button
         >
       </div>
@@ -152,15 +150,7 @@
         >SAHELI</span
       >
     </div>
-    {#if currentPath === "/dashboard"}
-      <button
-        onclick={() => (assistantOpen = !assistantOpen)}
-        class="brutal-btn p-2! bg-(--color-saheli-yellow)"
-        aria-label="Assistant"
-      >
-        <MicIcon class="w-6 h-6" />
-      </button>
-    {:else}
+    {#if currentPath !== "/dashboard"}
       <a
         href="/dashboard/assistant"
         class="brutal-btn p-2! bg-(--color-saheli-yellow)"
@@ -168,6 +158,8 @@
       >
         <MicIcon class="w-6 h-6" />
       </a>
+    {:else}
+      <div class="w-10 h-10"></div>
     {/if}
   </div>
 
@@ -176,7 +168,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-      class="lg:hidden fixed inset-0 z-100 bg-black/60 backdrop-blur-sm"
+      class="lg:hidden fixed inset-0 z-100 bg-(--color-saheli-text)/60 backdrop-blur-sm"
       onclick={() => (sidebarOpen = false)}
     >
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -229,19 +221,19 @@
             {#if data.isGuest}
               <a
                 href="/login"
-                class="brutal-btn w-full bg-black! text-white! py-2! text-[10px] text-center"
+                class="brutal-btn w-full bg-(--color-saheli-primary)! text-(--color-saheli-bg)! py-2! text-[10px] text-center"
                 >LOGIN</a
               >
             {:else}
               <button
                 onclick={signOut}
-                class="brutal-btn w-full bg-black! text-white! py-2! text-[10px]"
+                class="brutal-btn w-full bg-(--color-saheli-primary)! text-(--color-saheli-bg)! py-2! text-[10px]"
                 >LOGOUT</button
               >
             {/if}
             <button
               onclick={toggleTheme}
-              class="brutal-btn w-full bg-(--color-saheli-yellow)! py-2! text-[10px] text-black!"
+              class="brutal-btn w-full bg-(--color-saheli-yellow)! py-2! text-[10px] text-(--color-saheli-text)!"
               >{isDark ? "LIGHT" : "DARK"}</button
             >
           </div>
@@ -252,68 +244,11 @@
 
   <!-- Main Content Area -->
   <main
-    class="flex-1 p-4 md:p-8 min-w-0 bg-(--color-saheli-bg) lg:ml-64 {currentPath ===
-    '/dashboard'
-      ? 'xl:mr-96'
-      : ''}"
+    class="flex-1 p-4 md:p-8 min-w-0 bg-(--color-saheli-bg) lg:ml-64"
   >
     <div class="max-w-5xl mx-auto">
       {@render children()}
     </div>
   </main>
 
-  <!-- ───── Sidebar (Desktop Right - Chatbot) ───── -->
-  {#if currentPath === "/dashboard"}
-    <aside
-      class="hidden xl:flex flex-col w-96 bg-(--color-saheli-surface) border-l-2 border-(--color-saheli-border) h-screen fixed right-0 top-0 shrink-0 z-40"
-    >
-      <div
-        class="p-5 border-b-2 border-(--color-saheli-border) bg-(--color-saheli-primary) flex items-center justify-between"
-      >
-        <h2 class="text-xl font-black tracking-tight text-black">SAHELI AI</h2>
-        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-      </div>
-      <div class="flex-1 flex flex-col p-5 overflow-hidden">
-        <VoiceAssistant
-          chatHistory={[]}
-          languagePref={data.profile?.language_pref || "en"}
-        />
-      </div>
-    </aside>
-  {/if}
-
-  <!-- Mobile Assistant Drawer (Right) -->
-  {#if assistantOpen && currentPath === "/dashboard"}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div
-      class="xl:hidden fixed inset-0 z-100 bg-black/60 backdrop-blur-sm"
-      onclick={() => (assistantOpen = false)}
-    >
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        class="ml-auto w-[90%] h-full bg-(--color-saheli-surface) border-l-4 border-(--color-saheli-border) flex flex-col animate-slide-right"
-        onclick={(e) => e.stopPropagation()}
-      >
-        <div
-          class="p-5 border-b-2 border-(--color-saheli-border) bg-(--color-saheli-primary) flex items-center justify-between"
-        >
-          <h2 class="text-xl font-black tracking-tight text-black">
-            SAHELI AI
-          </h2>
-          <button
-            onclick={() => (assistantOpen = false)}
-            class="font-black text-2xl text-black">×</button
-          >
-        </div>
-        <div class="flex-1 flex flex-col p-5 overflow-hidden">
-          <VoiceAssistant
-            chatHistory={[]}
-            languagePref={data.profile?.language_pref || "en"}
-          />
-        </div>
-      </div>
-    </div>
-  {/if}
 </div>

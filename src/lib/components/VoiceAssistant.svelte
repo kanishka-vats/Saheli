@@ -131,7 +131,7 @@
         ctx!.fillStyle =
           getComputedStyle(document.documentElement)
             .getPropertyValue("--color-saheli-text")
-            .trim() || "#000000";
+            .trim() || "#2F2831";
         ctx!.fillRect(x, y, barWidth, barHeight);
       }
     }
@@ -290,7 +290,7 @@
         <div
           class="w-16 h-16 bg-(--color-saheli-primary) border-4 border-(--color-saheli-border) shadow-brutal flex items-center justify-center mb-4 rotate-3"
         >
-          <SaheliLogoIcon class="w-8 h-8 text-black" />
+          <SaheliLogoIcon class="w-8 h-8 text-(--color-saheli-bg)" />
         </div>
         <h3
           class="text-xl font-black tracking-tighter uppercase text-(--color-saheli-text)"
@@ -338,9 +338,9 @@
         >
           {#if msg.role === "assistant"}
             <div
-              class="w-6 h-6 shrink-0 bg-black flex items-center justify-center border border-black shadow-[1px_1px_0px_white]"
+              class="w-6 h-6 shrink-0 bg-(--color-saheli-primary) flex items-center justify-center border border-(--color-saheli-border) shadow-[1px_1px_0px_var(--color-saheli-bg)]"
             >
-              <SaheliLogoIcon class="w-4 h-4 text-white" />
+              <SaheliLogoIcon class="w-4 h-4 text-(--color-saheli-bg)" />
             </div>
           {/if}
           <div
@@ -377,13 +377,13 @@
 
     {#if (isGuest && guestChatCount.value >= 3) || errorMessage}
       {#if isGuest && guestChatCount.value >= 3}
-        <div class="p-4 border-4 border-black bg-(--color-saheli-yellow) space-y-3 shadow-brutal animate-bounce">
+        <div class="p-4 border-4 border-(--color-saheli-border) bg-(--color-saheli-yellow) space-y-3 shadow-brutal animate-bounce">
           <p class="font-black text-sm uppercase text-center">LIMIT REACHED! LOGIN TO CONTINUE YOUR CHAT WITH SAHELI.</p>
-          <a href="/login" class="brutal-btn w-full bg-black text-white py-3! text-center block">LOGIN / SIGNUP</a>
+          <a href="/login" class="brutal-btn w-full bg-(--color-saheli-primary) text-(--color-saheli-bg) py-3! text-center block">LOGIN / SIGNUP</a>
         </div>
       {:else if errorMessage}
         <div
-          class="p-2 border-2 border-black bg-red-100 text-red-900 font-black text-[9px] uppercase text-center"
+          class="p-2 border-2 border-(--color-saheli-border) bg-(--color-saheli-accent)/20 text-(--color-saheli-accent) font-black text-[9px] uppercase text-center"
         >
           ERROR: {errorMessage}
         </div>
@@ -399,7 +399,7 @@
     <div class="flex items-center justify-between min-h-[24px]">
       {#if isRecording}
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 bg-red-600 animate-ping"></div>
+          <div class="w-2 h-2 bg-(--color-saheli-accent) animate-ping"></div>
           <canvas
             bind:this={waveformCanvas}
             width="100"
@@ -410,7 +410,7 @@
       {:else if isSpeaking}
         <button
           onclick={stopSpeaking}
-          class="flex items-center gap-2 px-2 py-1 bg-(--color-saheli-yellow) border-2 border-(--color-saheli-border) animate-pulse text-black"
+          class="flex items-center gap-2 px-2 py-1 bg-(--color-saheli-yellow) border-2 border-(--color-saheli-border) animate-pulse text-(--color-saheli-text)"
         >
           <svg
             width="12"
@@ -437,8 +437,8 @@
         onclick={() => (isRecording ? stopRecording() : startRecording())}
         disabled={isProcessing}
         class="w-12 h-12 shrink-0 border-4 border-(--color-saheli-border) flex items-center justify-center transition-all {isRecording
-          ? 'bg-red-500 text-white animate-pulse'
-          : 'bg-(--color-saheli-primary) hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal text-black'}"
+          ? 'bg-(--color-saheli-accent) text-(--color-saheli-bg) animate-pulse'
+          : 'bg-(--color-saheli-primary) hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal text-(--color-saheli-bg)'}"
         title="Voice"
       >
         <MicIcon class="w-6 h-6" />

@@ -151,9 +151,9 @@
       {@const status = getDayStatus(day)}
       <button
         onclick={() => onLogPeriod?.(formatDate(day))}
-        class="aspect-square border-4 border-(--color-saheli-border) font-black text-xl flex items-center justify-center transition-all duration-100 {status === 'active' ? 'bg-(--color-saheli-accent) text-white shadow-brutal translate-x-0.5 translate-y-0.5' : 
+        class="aspect-square border-4 border-(--color-saheli-border) font-black text-xl flex items-center justify-center transition-all duration-100 {status === 'active' ? 'bg-(--color-saheli-accent) text-(--color-saheli-bg) shadow-brutal translate-x-0.5 translate-y-0.5' : 
                status === 'predicted' ? 'bg-(--color-saheli-surface) border-dashed text-(--color-saheli-text)' : 
-               status === 'today' ? 'bg-(--color-saheli-yellow) text-black' : 'bg-(--color-saheli-surface) text-(--color-saheli-text) hover:bg-(--color-saheli-bg)'}"
+               status === 'today' ? 'bg-(--color-saheli-yellow) text-(--color-saheli-text)' : 'bg-(--color-saheli-surface) text-(--color-saheli-text) hover:bg-(--color-saheli-bg)'}"
       >
         {day}
       </button>

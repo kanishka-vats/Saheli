@@ -133,7 +133,7 @@
         <button
           class="flex-1 py-3 text-lg font-black transition-all duration-100 {mode ===
           'login'
-            ? 'bg-(--color-saheli-primary) text-black'
+            ? 'bg-(--color-saheli-primary) text-(--color-saheli-bg)'
             : 'bg-(--color-saheli-border) text-(--color-saheli-bg)'}"
           onclick={() => (mode = "login")}
           aria-label="Switch to Login"
@@ -143,7 +143,7 @@
         <button
           class="flex-1 py-3 text-lg font-black transition-all duration-100 {mode ===
           'signup'
-            ? 'bg-(--color-saheli-primary) text-black'
+            ? 'bg-(--color-saheli-primary) text-(--color-saheli-bg)'
             : 'bg-(--color-saheli-border) text-(--color-saheli-bg)'}"
           onclick={() => (mode = "signup")}
           aria-label="Switch to Signup"
@@ -205,7 +205,7 @@
 
         {#if errorMsg}
           <div
-            class="p-4 border-4 border-(--color-saheli-border) bg-red-100 text-red-700 font-black text-sm"
+            class="p-4 border-4 border-(--color-saheli-border) bg-(--color-saheli-accent)/20 text-(--color-saheli-accent) font-black text-sm"
           >
             ERROR: {errorMsg}
           </div>

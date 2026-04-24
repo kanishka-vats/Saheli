@@ -1,270 +1,271 @@
 @import 'tailwindcss';
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap');
 
 @theme {
-  --font-sans: 'Space Grotesk', sans-serif;
-  --font-display: 'Syne', sans-serif;
-  --radius-card: 0px; 
-  --radius-btn: 0px;
-  --radius-pill: 9999px;
-  --shadow-brutal: 3px 3px 0px 0px #000000;
-  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
+  --font-sans: 'Nunito', sans-serif;
+  --font-display: 'Nunito', sans-serif;
+
+  /* semantic tokens for utility classes like bg-primary/text-muted */
+  --color-primary: #E7A8B3;
+  --color-background: #F8F0F3;
+  --color-secondary: #F1C9D2;
+  --color-accent: #D98A97;
+  --color-text: #4E4044;
+  --color-muted: #98868D;
+  --color-surface: #F7ECEF;
+  --color-border: #EAD8DD;
+  --color-focus: #D98A97;
 }
 
-/* ─────────────────────────────────────────────
-   COLOR TOKENS — LIGHT (default)
- ───────────────────────────────────────────── */
 :root {
-  --color-saheli-bg:      #FFFFFF;
-  --color-saheli-surface: #FFFFFF;
+  --color-primary: #E7A8B3;
+  --color-background: #F8F0F3;
+  --color-secondary: #F1C9D2;
+  --color-accent: #D98A97;
+  --color-text: #4E4044;
+  --color-muted: #98868D;
+  --color-surface: #F7ECEF;
+  --color-border: #EAD8DD;
+  --color-focus: #D98A97;
 
-  --color-saheli-primary: #FF7C15;
-  --color-saheli-accent:  #000000;
-  --color-saheli-yellow:  #FFD600;
+  /* backward-compatible aliases used throughout components */
+  --color-saheli-primary: var(--color-primary);
+  --color-saheli-bg: var(--color-background);
+  --color-saheli-yellow: var(--color-secondary);
+  --color-saheli-accent: var(--color-accent);
+  --color-saheli-text: var(--color-text);
+  --color-saheli-muted: var(--color-muted);
+  --color-saheli-surface: var(--color-surface);
+  --color-saheli-border: var(--color-border);
+  --color-saheli-focus: var(--color-focus);
 
-  --color-saheli-text:    #000000;
-  --color-saheli-muted:   #444444;
-  --color-saheli-border:  #000000;
-
-  --shadow-brutal:    3px 3px 0px 0px #000000;
-  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
+  --shadow-soft: 0 10px 30px rgba(216, 140, 160, 0.14);
+  --shadow-soft-lg: 0 16px 40px rgba(216, 140, 160, 0.2);
 }
 
-/* Manual override — force dark mode */
 [data-theme="dark"] {
-  --color-saheli-bg:      #0A0A0A;
-  --color-saheli-surface: #141414;
+  --color-primary: #B78491;
+  --color-background: #2A1F24;
+  --color-secondary: #7B6069;
+  --color-accent: #A97584;
+  --color-text: #F5EDEE;
+  --color-muted: #C8B7BE;
+  --color-surface: #342931;
+  --color-border: #4B3A42;
+  --color-focus: #BE8B9A;
 
-  --color-saheli-primary: #FF7C15;
-  --color-saheli-accent:  #FFD600;
-  --color-saheli-yellow:  #FFD600;
+  --color-saheli-primary: var(--color-primary);
+  --color-saheli-bg: var(--color-background);
+  --color-saheli-yellow: var(--color-secondary);
+  --color-saheli-accent: var(--color-accent);
+  --color-saheli-text: var(--color-text);
+  --color-saheli-muted: var(--color-muted);
+  --color-saheli-surface: var(--color-surface);
+  --color-saheli-border: var(--color-border);
+  --color-saheli-focus: var(--color-focus);
 
-  --color-saheli-text:    #F0EDE6;
-  --color-saheli-muted:   #888880;
-  --color-saheli-border:  #FF7C15;
-
-  --shadow-brutal:    3px 3px 0px 0px #FF7C15;
-  --shadow-brutal-lg: 8px 8px 0px 0px #FF7C15;
+  --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.3);
+  --shadow-soft-lg: 0 18px 40px rgba(0, 0, 0, 0.38);
 }
 
-/* Manual override — force light mode */
 [data-theme="light"] {
-  --color-saheli-bg:      #FFFFFF;
-  --color-saheli-surface: #FFFFFF;
-
-  --color-saheli-primary: #FF7C15;
-  --color-saheli-accent:  #000000;
-  --color-saheli-yellow:  #FFD600;
-
-  --color-saheli-text:    #000000;
-  --color-saheli-muted:   #444444;
-  --color-saheli-border:  #000000;
-
-  --shadow-brutal:    3px 3px 0px 0px #000000;
-  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
+  --color-primary: #E7A8B3;
+  --color-background: #F8F0F3;
+  --color-secondary: #F1C9D2;
+  --color-accent: #D98A97;
+  --color-text: #4E4044;
+  --color-muted: #98868D;
+  --color-surface: #F7ECEF;
+  --color-border: #EAD8DD;
+  --color-focus: #D98A97;
 }
 
-/* ─────────────────────────────────────────────
-   GLOBAL RESET & BASE
- ───────────────────────────────────────────── */
-*, *::before, *::after { 
-  box-sizing: border-box; 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   border-color: var(--color-saheli-border);
 }
 
-html { 
-  scroll-behavior: smooth; 
-  cursor: crosshair; 
+html {
+  scroll-behavior: smooth;
+  cursor: auto;
   font-size: 15px;
+  font-family: var(--font-sans);
 }
 
 body {
   font-family: var(--font-sans);
+  font-weight: 500;
+  line-height: 1.6;
   background: var(--color-saheli-bg);
   color: var(--color-saheli-text);
   min-height: 100dvh;
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.35;
   color: var(--color-saheli-text);
-  text-shadow: none !important;
 }
 
-/* ─────────────────────────────────────────────
-   BRUTALIST COMPONENTS
- ───────────────────────────────────────────── */
 .brutal-card {
-  background: var(--color-saheli-surface);
-  border: 2px solid #000000;
-  box-shadow: var(--shadow-brutal);
-  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: color-mix(in oklab, var(--color-saheli-surface) 88%, transparent);
+  border: 1px solid var(--color-saheli-border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
 }
 
-.brutal-card:hover, .brutal-card:focus-within {
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-brutal-lg);
-  background: #FFFFFF !important;
-  color: #000000 !important;
+.brutal-card:hover,
+.brutal-card:focus-within {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft-lg);
 }
 
 .brutal-card:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px 0px #000000;
+  transform: translateY(0);
 }
 
-/* Card hover/active states using tokens */
-.brutal-card { border-color: var(--color-saheli-border); }
-.brutal-card:hover, .brutal-card:focus-within {
-  background: var(--color-saheli-bg) !important;
-  color: var(--color-saheli-text) !important;
-}
-.brutal-card:active {
-  box-shadow: 1px 1px 0px 0px var(--color-saheli-border);
-}
-[data-theme="dark"] .brutal-card:hover,
-[data-theme="dark"] .brutal-card:focus-within {
-  background: #1E1400 !important;
-  color: #F0EDE6 !important;
-}
-
-/* Stable card variant for pages where hover shift hurts UX */
 .no-card-shift,
 .no-card-shift:hover,
 .no-card-shift:focus-within,
 .no-card-shift:active {
   transform: none !important;
-  box-shadow: var(--shadow-brutal) !important;
-}
-.no-card-shift:hover,
-.no-card-shift:focus-within,
-.no-card-shift:active {
-  background: var(--color-saheli-surface) !important;
-  color: var(--color-saheli-text) !important;
 }
 
 .brutal-btn {
   background: var(--color-saheli-primary);
-  border: 2px solid #000000;
-  box-shadow: var(--shadow-brutal);
-  padding: 0.6rem 1.25rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  transition: all 0.1s steps(2);
+  border: 1px solid color-mix(in oklab, var(--color-saheli-border) 85%, var(--color-saheli-accent));
+  border-radius: 0.9rem;
+  box-shadow: 0 6px 16px rgba(216, 140, 160, 0.22);
+  padding: 0.62rem 1.2rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  color: #000000;
+  font-size: 0.92rem;
+  color: var(--color-saheli-text);
 }
 
-.brutal-btn {
-  border-color: var(--color-saheli-border);
-}
 .brutal-btn:hover {
-  box-shadow: 4px 4px 0px 0px var(--color-saheli-border);
-  background: var(--color-saheli-surface) !important;
-  color: var(--color-saheli-text) !important;
+  background: color-mix(in oklab, var(--color-saheli-primary) 84%, var(--color-saheli-accent));
+  box-shadow: 0 10px 22px rgba(216, 140, 160, 0.28);
 }
-[data-theme="dark"] .brutal-btn:hover  { box-shadow: 4px 4px 0px 0px var(--color-saheli-border); background: #FFD600 !important; color: #000000 !important; }
+
+.brutal-btn:active {
+  transform: translateY(1px);
+}
 
 .input-brutal {
-  background: #FFFFFF;
-  border: 2px solid #000000;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
+  background: color-mix(in oklab, var(--color-saheli-surface) 92%, transparent);
+  border: 1px solid var(--color-saheli-border);
+  border-radius: 0.9rem;
+  padding: 0.68rem 0.95rem;
+  font-weight: 500;
+  color: var(--color-saheli-text);
   outline: none;
   width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-/* Dark: input gets dark fill, light text, orange border */
-@media (prefers-color-scheme: dark) {
-  .input-brutal {
-    background: #FFFFFF;
-    border-color: var(--color-saheli-border);
-    color: var(--color-saheli-text);
-    caret-color: var(--color-saheli-primary);
-  }
-  .input-brutal::placeholder { color: var(--color-saheli-muted); }
-  .input-brutal:focus {
-    border-color: var(--color-saheli-yellow);
-    box-shadow: 3px 3px 0px 0px var(--color-saheli-yellow);
-  }
-}
-[data-theme="dark"] .input-brutal {
-  background: #1A1A1A;
-  border-color: var(--color-saheli-border);
-  color: var(--color-saheli-text);
-  caret-color: var(--color-saheli-primary);
-}
-[data-theme="dark"] .input-brutal::placeholder { color: var(--color-saheli-muted); }
-[data-theme="dark"] .input-brutal:focus {
-  border-color: var(--color-saheli-yellow);
-  box-shadow: 3px 3px 0px 0px var(--color-saheli-yellow);
+.input-brutal::placeholder {
+  color: var(--color-saheli-muted);
 }
 
-/* ─────────────────────────────────────────────
-   ANIMATIONS & DECOR
- ───────────────────────────────────────────── */
+.input-brutal:focus {
+  border-color: var(--color-saheli-focus);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-saheli-focus) 24%, transparent);
+  background: var(--color-saheli-bg);
+}
+
 .marquee {
   white-space: nowrap;
   overflow: hidden;
-  border-top: 2px solid #000000;
-  border-bottom: 2px solid #000000;
-  background: var(--color-saheli-primary);
-  padding: 0.4rem 0;
+  border-top: 1px solid var(--color-saheli-border);
+  border-bottom: 1px solid var(--color-saheli-border);
+  background: color-mix(in oklab, var(--color-saheli-secondary, var(--color-saheli-yellow)) 88%, var(--color-saheli-bg));
+  padding: 0.44rem 0;
 }
-
-/* Dark: marquee borders follow token */
-@media (prefers-color-scheme: dark) {
-  .marquee { border-color: var(--color-saheli-border); }
-}
-[data-theme="dark"] .marquee { border-color: var(--color-saheli-border); }
 
 .marquee-content {
   display: inline-block;
   animation: marquee 30s linear infinite;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #000000; /* Always dark on orange strip */
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-saheli-text);
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .cursor-brutal {
   position: fixed;
-  width: 18px;
-  height: 18px;
-  background: #000000;
-  border: 1.5px solid #FFFFFF;
+  width: 14px;
+  height: 14px;
+  background: var(--color-saheli-accent);
+  border: 1px solid var(--color-saheli-bg);
+  border-radius: 9999px;
   pointer-events: none;
   z-index: 9999;
-  mix-blend-mode: difference;
+  opacity: 0.72;
+  mix-blend-mode: normal;
 }
 
-/* ─────────────────────────────────────────────
-   SELECTION & SCROLLBAR
- ───────────────────────────────────────────── */
 ::selection {
-  background: var(--color-saheli-primary);
-  color: #000000;
+  background: color-mix(in oklab, var(--color-saheli-primary) 55%, transparent);
+  color: var(--color-saheli-text);
 }
 
-::-webkit-scrollbar       { width: 8px; background: var(--color-saheli-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-saheli-primary); border: 1px solid var(--color-saheli-border); }
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--color-saheli-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-saheli-primary) 72%, var(--color-saheli-secondary, var(--color-saheli-yellow)));
+  border-radius: 9999px;
+  border: 1px solid var(--color-saheli-border);
+}
 
-/* ─────────────────────────────────────────────
-   RESPONSIVE
- ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  html { font-size: 14px; }
-  h1 { font-size: 3rem !important; }
+  html {
+    font-size: 14px;
+  }
+}
+
+button,
+label,
+input,
+textarea,
+select {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 600 !important;
+}
+
+.font-black {
+  font-weight: 700 !important;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--color-saheli-focus) 70%, transparent);
+  outline-offset: 2px;
 }

@@ -75,10 +75,10 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto flex flex-col gap-6 lg:h-[calc(100dvh-4rem)]">
-  <header class="border-b-4 md:border-b-8 border-black pb-4 md:pb-8 shrink-0">
+  <header class="border-b-4 md:border-b-8 border-(--color-saheli-border) pb-4 md:pb-8 shrink-0">
     <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
       <div
-        class="w-12 h-12 md:w-16 md:h-16 bg-(--color-saheli-primary) text-black flex items-center justify-center border-2 md:border-4 border-black shadow-brutal"
+        class="w-12 h-12 md:w-16 md:h-16 bg-(--color-saheli-primary) text-(--color-saheli-bg) flex items-center justify-center border-2 md:border-4 border-(--color-saheli-border) shadow-brutal"
       >
         <svg
           width="24"
@@ -99,7 +99,7 @@
         >
       </div>
       <h1
-        class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase text-black"
+        class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase text-(--color-saheli-text)"
       >
         MOOD TRACKER
       </h1>
@@ -124,10 +124,10 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {#each moodLogs.slice(0, 8) as log}
-            <div class="brutal-card p-6 bg-white flex flex-col justify-between">
+            <div class="brutal-card p-6 bg-(--color-saheli-surface) flex flex-col justify-between">
               <div class="flex justify-between items-start mb-4">
                 <div
-                  class="w-12 h-12 border-4 border-black flex items-center justify-center text-2xl bg-(--color-saheli-yellow)"
+                  class="w-12 h-12 border-4 border-(--color-saheli-border) flex items-center justify-center text-2xl bg-(--color-saheli-yellow)"
                 >
                   {#if log.mood_score === 1}
                     😠
@@ -151,7 +151,7 @@
                   </p>
                   <button
                     onclick={() => deleteEntry(log.id)}
-                    class="font-black text-[10px] text-red-600 hover:bg-black hover:text-white px-1 mt-1 transition-colors"
+                    class="font-black text-[10px] text-(--color-saheli-accent) hover:bg-(--color-saheli-primary) hover:text-(--color-saheli-bg) px-1 mt-1 transition-colors"
                   >
                     DELETE ENTRY [×]
                   </button>
@@ -167,7 +167,7 @@
                   <div class="flex flex-wrap gap-1">
                     {#each log.symptoms as s}
                       <span
-                        class="text-[10px] font-black bg-black text-white px-1.5 py-0.5"
+                        class="text-[10px] font-black bg-(--color-saheli-primary) text-(--color-saheli-bg) px-1.5 py-0.5"
                         >{s}</span
                       >
                     {/each}
@@ -175,7 +175,7 @@
                 {/if}
 
                 {#if log.notes}
-                  <div class="pt-2 border-t-2 border-black border-dashed">
+                  <div class="pt-2 border-t-2 border-(--color-saheli-border) border-dashed">
                     <p
                       class="text-[10px] font-bold uppercase opacity-60 italic"
                     >
